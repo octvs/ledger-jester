@@ -270,6 +270,10 @@ class RevolutConverter(CsvConverter):
 
         currency = row["Currency"]
         cleared = row["State"] == "COMPLETED"
+
+        _prefixes = re.compile(r"(From |To |Payment from )")
+        payee = re.sub(_prefixes, "", row["Description"])
+
         if row["Type"] == "TOPUP":
             reverse = True
             acct_from = "Assets:Other"
