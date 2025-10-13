@@ -64,7 +64,7 @@ class Posting(object):
 
     def format(self, indent=4, assertions=True):
         space_count = (
-            65 - indent - len(self.account) - len(self.amount.format())
+            61 - indent - len(self.account) - len(self.amount.format())
         )
         if space_count < 2:
             space_count = 2
