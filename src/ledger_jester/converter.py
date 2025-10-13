@@ -274,6 +274,8 @@ class RevolutConverter(CsvConverter):
         _prefixes = re.compile(r"(From |To |Payment from )")
         payee = re.sub(_prefixes, "", row["Description"])
 
+        payee = self.lgr.get_autosync_payee(payee, self.name)
+
         if row["Type"] == "TOPUP":
             reverse = True
             acct_from = "Assets:Other"
@@ -284,10 +286,9 @@ class RevolutConverter(CsvConverter):
             reverse = False
             acct_from = self.name
             amt_from = Amount(amt, currency, reverse=reverse)
-            acct_to = "Expenses:Misc"
+            acct_to = self.mk_dynamic_account(payee, exclude=self.name)
             amt_to = Amount(amt, currency, reverse=not reverse)
 
-        payee = row["Description"]
         meta = {"csvid": self.get_csv_id(row)}
 
         posting_from = Posting(
