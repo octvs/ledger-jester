@@ -275,6 +275,7 @@ class RevolutConverter(CsvConverter):
         payee = re.sub(_prefixes, "", row["Description"])
 
         payee = self.lgr.get_autosync_payee(payee, self.name)
+        posterior_bal = Amount(Decimal(row["Balance"]), currency)
 
         if row["Type"] == "TOPUP":
             reverse = True
@@ -294,6 +295,7 @@ class RevolutConverter(CsvConverter):
         posting_from = Posting(
             acct_from,
             amt_from,
+            asserted=posterior_bal if acct_from == self.name else None,
             metadata=meta if acct_from == self.name else {},
         )
         posting_fee = (
@@ -305,7 +307,10 @@ class RevolutConverter(CsvConverter):
             else None
         )
         posting_to = Posting(
-            acct_to, amt_to, metadata=meta if acct_to == self.name else {}
+            acct_to,
+            amt_to,
+            asserted=posterior_bal if acct_to == self.name else None,
+            metadata=meta if acct_to == self.name else {},
         )
 
         date = datetime.datetime.strptime(

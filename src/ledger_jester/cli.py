@@ -81,10 +81,10 @@ if importing from file, set account name for import",
 found by payee",
     )
     parser.add_argument(
-        "--assertions",
-        action="store_true",
-        default=False,
-        help="create balance assertion entries",
+        "--no-assertions",
+        action="store_false",
+        dest="assertions",
+        help="do not append balance assertions",
     )
     parser.add_argument(
         "-d",
