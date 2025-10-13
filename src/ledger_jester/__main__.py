@@ -1,9 +1,6 @@
-from foo import hello_world
+#!/usr/bin/env python
 
-
-def main() -> None:
-    print(hello_world())
-
+from ledger_jester.cli import run
 
 if __name__ == "__main__":
-    main()
+    run()

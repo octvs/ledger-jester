@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 import argparse
 import logging
 import os
@@ -200,7 +198,3 @@ All transactions will be printed!\n"
 
     _, file_extension = os.path.splitext(args.PATH.lower())
     import_csv(ledger, args)
-
-
-if __name__ == "__main__":
-    run()
