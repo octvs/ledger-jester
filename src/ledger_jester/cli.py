@@ -90,7 +90,6 @@ found by payee",
         "-d",
         "--debug",
         action="store_true",
-        default=False,
         help="enable debug logging",
     )
     parser.add_argument(
