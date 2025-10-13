@@ -1,0 +1,13 @@
+[project]
+name = "foo"
+authors = [{ name = "O. C. Taskin", email = "octvs@posteo.de" }]
+version = "0.0.0"
+# dependencies = []
+description = "a template python app"
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project.scripts]
+foo = "foo.__main__:main"
