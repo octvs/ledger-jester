@@ -261,6 +261,13 @@ class RevolutConverter(CsvConverter):
         amt = Decimal(row["Amount"])
         if not amt:
             return ""
+        # Ignore reverted xacts
+        if row["State"] == "REVERTED":
+            return None
+        # TODO: For now ignore logs related to savings account
+        if row["Product"] == "Deposit":
+            return None
+
         currency = row["Currency"]
         cleared = row["State"] == "COMPLETED"
         if row["Type"] == "TOPUP":
