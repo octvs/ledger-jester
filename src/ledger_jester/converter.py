@@ -257,20 +257,11 @@ class RevolutConverter(CsvConverter):
     def __init__(self, *args, **kwargs):
         super(RevolutConverter, self).__init__(*args, **kwargs)
 
-    def mk_currency(self, currency):
-        if currency == "USD":
-            currency = "$"
-        elif currency == "GBP":
-            currency = "£"
-        elif currency == "EUR":
-            currency = "€"
-        return currency
-
     def convert(self, row):
         amt = Decimal(row["Amount"])
         if not amt:
             return ""
-        currency = self.mk_currency(row["Currency"])
+        currency = row["Currency"]
         cleared = row["State"] == "COMPLETED"
         if row["Type"] == "TOPUP":
             reverse = True
