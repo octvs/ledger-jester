@@ -328,7 +328,7 @@ class RevolutConverter(CsvConverter):
             date=date,
             cleared=cleared,
             aux_date=aux_date,
-            date_format="%Y-%m-%d",
+            date_format="%Y/%m/%d",
             payee=payee,
             postings=postings,
         )
