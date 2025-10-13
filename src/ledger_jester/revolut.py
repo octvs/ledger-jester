@@ -1,8 +1,8 @@
 # ledger-autosync plugin for CSV files from Revolut, a Lithuania-based online bank.
 
 import datetime
-from decimal import Decimal
 import re
+from decimal import Decimal
 
 from ledgerautosync.converter import (
     Amount,
@@ -64,7 +64,9 @@ class RevolutConverter(CsvConverter):
         meta = {"csvid": self.get_csv_id(row)}
 
         posting_from = Posting(
-            acct_from, amt_from, metadata=meta if acct_from == self.name else {}
+            acct_from,
+            amt_from,
+            metadata=meta if acct_from == self.name else {},
         )
         posting_fee = (
             Posting(
@@ -78,9 +80,13 @@ class RevolutConverter(CsvConverter):
             acct_to, amt_to, metadata=meta if acct_to == self.name else {}
         )
 
-        date = datetime.datetime.strptime(row["Started Date"], "%Y-%m-%d %H:%M:%S")
+        date = datetime.datetime.strptime(
+            row["Started Date"], "%Y-%m-%d %H:%M:%S"
+        )
         aux_date = (
-            datetime.datetime.strptime(row["Completed Date"], "%Y-%m-%d %H:%M:%S")
+            datetime.datetime.strptime(
+                row["Completed Date"], "%Y-%m-%d %H:%M:%S"
+            )
             if row["Completed Date"]
             else None
         )

@@ -29,8 +29,6 @@ import re
 import sys
 import traceback
 
-from ofxclient.config import OfxConfig
-
 from ledgerautosync import LedgerAutosyncException
 from ledgerautosync.converter import (
     ALL_AUTOSYNC_INITIAL,
@@ -41,6 +39,7 @@ from ledgerautosync.converter import (
 )
 from ledgerautosync.ledgerwrap import HLedger, Ledger, LedgerPython, mk_ledger
 from ledgerautosync.sync import CsvSynchronizer, OfxSynchronizer
+from ofxclient.config import OfxConfig
 
 
 def find_ledger_file(ledgerrcpath=None):
@@ -76,7 +75,9 @@ def print_results(converter, ofx, ledger, txns, args):
             ledger.check_transaction_by_id(
                 "ofxid", converter.mk_ofxid(AUTOSYNC_INITIAL)
             )
-        ) and not (ledger.check_transaction_by_id("ofxid", ALL_AUTOSYNC_INITIAL)):
+        ) and not (
+            ledger.check_transaction_by_id("ofxid", ALL_AUTOSYNC_INITIAL)
+        ):
             print(converter.format_initial_balance(ofx.account.statement))
     for txn in txns:
         print(converter.convert(txn).format(args.indent))
@@ -149,7 +150,9 @@ def sync(ledger, accounts, args):
     sync = OfxSynchronizer(ledger, shortenaccount=args.shortenaccount)
     for acct in accounts:
         try:
-            (ofx, txns) = sync.get_new_txns(acct, resync=args.resync, max_days=args.max)
+            (ofx, txns) = sync.get_new_txns(
+                acct, resync=args.resync, max_days=args.max
+            )
             if ofx is not None:
                 converter = make_ofx_converter(
                     account=ofx.account,
@@ -169,16 +172,22 @@ def sync(ledger, accounts, args):
         except KeyboardInterrupt:
             raise
         except BaseException:
-            sys.stderr.write("Caught exception processing %s\n" % (acct.description))
+            sys.stderr.write(
+                "Caught exception processing %s\n" % (acct.description)
+            )
             traceback.print_exc(file=sys.stderr)
 
 
 def import_ofx(ledger, args):
     sync = OfxSynchronizer(
-        ledger, hardcodeaccount=args.hardcodeaccount, shortenaccount=args.shortenaccount
+        ledger,
+        hardcodeaccount=args.hardcodeaccount,
+        shortenaccount=args.shortenaccount,
     )
     ofx = OfxSynchronizer.parse_file(args.PATH)
-    txns = sync.filter(ofx.account.statement.transactions, ofx.account.account_id)
+    txns = sync.filter(
+        ofx.account.statement.transactions, ofx.account.account_id
+    )
     accountname = args.account
     if accountname is None:
         if ofx.account.institution is not None:
@@ -211,7 +220,9 @@ def import_ofx(ledger, args):
 
 def import_csv(ledger, args):
     if args.account is None:
-        raise Exception("When importing a CSV file, you must specify an account name.")
+        raise Exception(
+            "When importing a CSV file, you must specify an account name."
+        )
     sync = CsvSynchronizer(
         ledger, payee_format=args.payee_format, date_format=args.date_format
     )
@@ -235,8 +246,12 @@ def load_plugins(config_dir):
             import ledgerautosync.plugins  # noqa: F401
 
             file_path = os.path.join(plugin_dir, plugin)
-            module_name = f"ledgerautosync.plugins.{os.path.splitext(plugin)[0]}"
-            spec = importlib.util.spec_from_file_location(module_name, file_path)
+            module_name = (
+                f"ledgerautosync.plugins.{os.path.splitext(plugin)[0]}"
+            )
+            spec = importlib.util.spec_from_file_location(
+                module_name, file_path
+            )
             module = importlib.util.module_from_spec(spec)
             sys.modules[module_name] = module
             spec.loader.exec_module(module)
@@ -248,7 +263,11 @@ def run(args=None, config=None):
 
     parser = argparse.ArgumentParser(description="Synchronize ledger.")
     parser.add_argument(
-        "-m", "--max", type=int, default=90, help="maximum number of days to process"
+        "-m",
+        "--max",
+        type=int,
+        default=90,
+        help="maximum number of days to process",
     )
     parser.add_argument(
         "-r",
@@ -343,7 +362,11 @@ found by payee",
         help="create balance assertion entries",
     )
     parser.add_argument(
-        "-d", "--debug", action="store_true", default=False, help="enable debug logging"
+        "-d",
+        "--debug",
+        action="store_true",
+        default=False,
+        help="enable debug logging",
     )
     parser.add_argument(
         "--hledger",
@@ -419,7 +442,9 @@ transactions",
 
     ledger_file = None
     if args.ledger and args.no_ledger:
-        raise LedgerAutosyncException("You cannot specify a ledger file and -L")
+        raise LedgerAutosyncException(
+            "You cannot specify a ledger file and -L"
+        )
     elif args.ledger:
         ledger_file = args.ledger
     else:
@@ -479,7 +504,9 @@ All transactions will be printed!\n"
                 config = OfxConfig()
         accounts = config.accounts()
         if args.account:
-            accounts = [acct for acct in accounts if acct.description == args.account]
+            accounts = [
+                acct for acct in accounts if acct.description == args.account
+            ]
         sync(ledger, accounts, args)
     else:
         _, file_extension = os.path.splitext(args.PATH.lower())

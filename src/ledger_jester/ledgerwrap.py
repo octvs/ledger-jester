@@ -29,7 +29,9 @@ from threading import Thread
 
 from ledgerautosync.converter import Converter
 
-csv.register_dialect("ledger", delimiter=",", quoting=csv.QUOTE_ALL, escapechar="\\")
+csv.register_dialect(
+    "ledger", delimiter=",", quoting=csv.QUOTE_ALL, escapechar="\\"
+)
 
 
 def mk_ledger(ledger_file):
@@ -129,7 +131,9 @@ class Ledger(MetaLedger):
                 close_fds=True,
             )
             self.q = Queue()
-            self.t = Thread(target=enqueue_output, args=(self.p.stdout, self.q))
+            self.t = Thread(
+                target=enqueue_output, args=(self.p.stdout, self.q)
+            )
             self.t.daemon = True  # thread dies with the program
             self.t.start()
             # read output until prompt
@@ -168,7 +172,9 @@ class Ledger(MetaLedger):
             if os.name == "nt":
                 cmd = MetaLedger.windows_clean(cmd)
             return csv.reader(
-                subprocess.check_output(cmd, universal_newlines=True).splitlines(),
+                subprocess.check_output(
+                    cmd, universal_newlines=True
+                ).splitlines(),
                 dialect="ledger",
             )
 
@@ -239,14 +245,20 @@ class LedgerPython(MetaLedger):
             self.payees = {}
             for xact in self.journal:
                 for post in xact.posts():
-                    self.add_payee(xact.payee, post.reported_account().fullname())
+                    self.add_payee(
+                        xact.payee, post.reported_account().fullname()
+                    )
 
     def check_transaction_by_id(self, key, value):
-        q = self.journal.query('-E meta %s="%s"' % (key, Converter.clean_id(value)))
+        q = self.journal.query(
+            '-E meta %s="%s"' % (key, Converter.clean_id(value))
+        )
         return len(q) > 0
 
     def get_autosync_payee(self, payee, account):
-        logging.error("payee lookup not implemented for LedgerPython, using raw payee")
+        logging.error(
+            "payee lookup not implemented for LedgerPython, using raw payee"
+        )
         return payee
 
 
@@ -292,5 +304,7 @@ class HLedger(MetaLedger):
                 self.add_payee(line["description"], line["account"])
 
     def get_autosync_payee(self, payee, account):
-        logging.error("payee lookup not implemented for HLedger, using raw payee")
+        logging.error(
+            "payee lookup not implemented for HLedger, using raw payee"
+        )
         return payee

@@ -21,9 +21,8 @@ import codecs
 import csv
 import logging
 
-from ofxparse import OfxParser, OfxParserException
-
 from ledgerautosync.converter import CsvConverter
+from ofxparse import OfxParser, OfxParserException
 
 
 class Synchronizer(object):
@@ -95,7 +94,9 @@ class OfxSynchronizer(Synchronizer):
             sorted_txns = txns
         else:
             sorted_txns = sorted(txns, key=OfxSynchronizer.extract_sort_key)
-        retval = [txn for txn in sorted_txns if not (self.is_txn_synced(acctid, txn))]
+        retval = [
+            txn for txn in sorted_txns if not (self.is_txn_synced(acctid, txn))
+        ]
         return self.filter_comment_txns(retval)
 
     def get_new_txns(self, acct, max_days=999999, resync=False):
@@ -111,8 +112,13 @@ class OfxSynchronizer(Synchronizer):
             )
             raw = acct.download(days=days)
 
-            if raw.read() == "Server error occured.  Received HttpStatusCode of 400":
-                raise Exception("Error connecting to account %s" % (acct.description))
+            if (
+                raw.read()
+                == "Server error occured.  Received HttpStatusCode of 400"
+            ):
+                raise Exception(
+                    "Error connecting to account %s" % (acct.description)
+                )
             raw.seek(0)
             ofx = None
             try:
@@ -139,7 +145,9 @@ class OfxSynchronizer(Synchronizer):
                     days = days * 2
                     if days > max_days:
                         days = max_days
-                    logging.debug("empty account: increasing days ago to %d." % (days))
+                    logging.debug(
+                        "empty account: increasing days ago to %d." % (days)
+                    )
                     last_txns_len = 0
             else:
                 txns = ofx.account.statement.transactions
@@ -149,7 +157,9 @@ class OfxSynchronizer(Synchronizer):
                 if (len(txns) > 0) and (last_txns_len == len(txns)):
                     # not getting more txns than last time; we have
                     # reached the beginning
-                    logging.debug("Not getting more txns than last time, done.")
+                    logging.debug(
+                        "Not getting more txns than last time, done."
+                    )
                     return (ofx, new_txns)
                 elif (len(txns) > len(new_txns)) or (days >= max_days):
                     # got more txns than were new or hit max_days, we've
@@ -180,7 +190,9 @@ class CsvSynchronizer(Synchronizer):
             # All transactions are considered "synced" in this case.
             return False
         else:
-            return self.lgr.check_transaction_by_id("csvid", converter.get_csv_id(row))
+            return self.lgr.check_transaction_by_id(
+                "csvid", converter.get_csv_id(row)
+            )
 
     def parse_file(self, path, accountname=None, unknownaccount=None):
         with open(path) as f:
