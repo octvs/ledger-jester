@@ -1,13 +1,13 @@
 [project]
-name = "foo"
+name = "ledger-jester"
 authors = [{ name = "O. C. Taskin", email = "octvs@posteo.de" }]
-version = "0.0.0"
-# dependencies = []
-description = "a template python app"
+version = "0.0.1"
+dependencies = ["ledger"]
+description = "a stripped down fork of ledger-autosync"
 
 [build-system]
 requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
 
 [project.scripts]
-foo = "foo.__main__:main"
+ledger-injest = "ledger_jester.cli:run"

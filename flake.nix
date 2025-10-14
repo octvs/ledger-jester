@@ -14,18 +14,17 @@
     flake-utils.lib.eachDefaultSystem (
       system: let
         pkgs = nixpkgs.legacyPackages.${system};
-        deps = with pkgs; [ledger];
-        pyDeps = with pkgs.python3Packages; [ledger];
-        runtimeDeps = deps ++ pyDeps;
+        runtimeDeps = with pkgs.python3Packages; [ledger];
         buildDeps = with pkgs.python3Packages; [setuptools];
         devDeps = with pkgs.python3Packages; [mypy];
       in {
         packages.default = pkgs.python3Packages.buildPythonApplication {
-          pname = "foo";
+          pname = "ledger-jester";
           version = "0.1";
           pyproject = true;
-          propagatedBuildInputs = runtimeDeps ++ buildDeps;
+          dependencies = runtimeDeps ++ buildDeps;
           src = ./.;
+          dontCheckRuntimeDeps = true;
         };
         devShells.default = pkgs.mkShell {buildInputs = runtimeDeps ++ devDeps;};
       }
