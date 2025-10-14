@@ -23,10 +23,6 @@ class Ledger:
             return None
 
     def get_account_by_payee(self, payee, exclude):
-        for regex, account in self.rules:
-            if regex.match(payee):
-                return account
-
         self.load_payees()
         return self.filter_accounts(self.payees.get(payee, []), exclude)
 
@@ -78,10 +74,6 @@ class Ledger:
                 exit(1)
 
         self.payees = None
-        self.rules = []
-
-    def add_rule(self, regex, account):
-        self.rules.append((regex, account))
 
     @staticmethod
     def pipe_quote(a):

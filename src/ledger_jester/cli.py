@@ -1,7 +1,6 @@
 import argparse
 import logging
 import os
-import re
 import sys
 from pathlib import Path
 
@@ -57,12 +56,6 @@ def run(args=None, config=None):
         default=None,
         help="specify ledger file to READ for syncing",
         metavar="LEDGER_FILE",
-    )
-    parser.add_argument(
-        "--rules",
-        type=str,
-        default=None,
-        help="specify rule file to READ for Payee matching",
     )
     parser.add_argument(
         "-i",
@@ -124,10 +117,5 @@ found by payee",
 
     ledger = Ledger(ledger_file=ledger_file, no_pipe=True)
 
-    if args.rules and Path(args.rules).exists():
-        with open(args.rules) as f:
-            for line in f:
-                regex, account = line.strip().split("\t")
-                ledger.add_rule(re.compile(regex, re.IGNORECASE), account)
 
     import_csv(ledger, args)
