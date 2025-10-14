@@ -261,13 +261,11 @@ class RevolutConverter(CsvConverter):
         # Ignore reverted xacts
         if row is None or row["State"] == "REVERTED":
             return None
-        # TODO: For now ignore logs related to savings account
-        if row["Product"] == "Deposit":
-            return None
 
         date_start = dt.strptime(row["Started Date"], "%Y-%m-%d %H:%M:%S")
         date_comp = dt.strptime(row["Completed Date"], "%Y-%m-%d %H:%M:%S")
         amount = Decimal(row["Amount"])
+        fee = Decimal(row["Fee"])
         currency = row["Currency"]
         cleared = row["State"] == "COMPLETED"
         posterior_bal = Amount(Decimal(row["Balance"]), currency)
@@ -280,25 +278,34 @@ class RevolutConverter(CsvConverter):
         payee = re.sub(_prefixes, "", row["Description"])
         payee = self.lgr.get_autosync_payee(payee, self.name)
 
+        if row["Product"] == "Deposit":
+            acct_src = self.name + ":Savings"
+            # TODO: For now ignore internal transfer logs from savings
+            if row["Type"] == "Transfer":
+                return None
+            assert row["Type"] == "Interest"
+            acct_dst = "Income:Interest:Revolut"
+        else:
+            acct_src = self.name + ":Checking"
+            acct_dst = self.mk_dynamic_account(payee, exclude=acct_src)
+
         posting_dst = Posting(
-            account=self.mk_dynamic_account(payee, exclude=self.name),
+            account=acct_dst,
             amount=Amount(amount, currency, reverse=True),
         )
         posting_src = Posting(
-            account=self.name,
-            amount=Amount(amount, currency),
+            account=acct_src,
+            amount=Amount(amount - fee, currency),
             asserted=posterior_bal,
             metadata=meta,
         )
+        posting_fee = Posting(
+            "Expenses:Finance:Revolut", Amount(fee, currency)
+        )
         postings = [posting_dst, posting_src]
 
-        if row["Fee"] != "0.00":
-            posting_fee = Posting(
-                "Expenses:Finance:Revolut",
-                Amount(Decimal(row["Fee"]), currency, reverse=True),
-            )
+        if fee > 0:
             postings.append(posting_fee)
-            postings.append(posting_fee.clone_inverted(self.name))
 
         return Transaction(
             date=date_start,
