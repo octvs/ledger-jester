@@ -265,14 +265,14 @@ class RevolutConverter(CsvConverter):
         if row["Product"] == "Deposit":
             return None
 
+        date_start = dt.strptime(row["Started Date"], "%Y-%m-%d %H:%M:%S")
+        date_comp = dt.strptime(row["Completed Date"], "%Y-%m-%d %H:%M:%S")
         amount = Decimal(row["Amount"])
         currency = row["Currency"]
         cleared = row["State"] == "COMPLETED"
         posterior_bal = Amount(Decimal(row["Balance"]), currency)
         meta = {"csvid": self.get_csv_id(row)}
 
-        date_start = dt.strptime(row["Started Date"], "%Y-%m-%d %H:%M:%S")
-        date_comp = dt.strptime(row["Completed Date"], "%Y-%m-%d %H:%M:%S")
         if date_start.date() == date_comp.date():
             date_comp = None
 
