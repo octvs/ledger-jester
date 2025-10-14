@@ -49,8 +49,9 @@ class CsvSynchronizer:
             else:
                 f.seek(3)
             reader = csv.DictReader(f, dialect=dialect)
-            return [
-                converter.convert(row)
-                for row in reader
-                if not self.is_row_synced(converter, row)
-            ]
+
+            res = []
+            for row in reader:
+                if not self.is_row_synced(converter, row):
+                    res.append(converter.convert(row))
+            return res
