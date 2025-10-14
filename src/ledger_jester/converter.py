@@ -259,7 +259,7 @@ class RevolutConverter(CsvConverter):
 
     def convert(self, row):
         # Ignore reverted xacts
-        if row is None or row["State"] == "REVERTED":
+        if row is None or (row["State"] in ["REVERTED", "PENDING"]):
             return None
 
         date_start = dt.strptime(row["Started Date"], "%Y-%m-%d %H:%M:%S")
