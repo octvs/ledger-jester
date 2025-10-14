@@ -52,7 +52,5 @@ class CsvSynchronizer:
             return [
                 converter.convert(row)
                 for row in reader
-                if not (
-                    self.is_row_synced(converter, row) and (row is not None)
-                )
+                if not self.is_row_synced(converter, row)
             ]

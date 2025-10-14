@@ -258,76 +258,52 @@ class RevolutConverter(CsvConverter):
         super(RevolutConverter, self).__init__(*args, **kwargs)
 
     def convert(self, row):
-        amt = Decimal(row["Amount"])
-        if not amt:
-            return ""
         # Ignore reverted xacts
-        if row["State"] == "REVERTED":
+        if row is None or row["State"] == "REVERTED":
             return None
         # TODO: For now ignore logs related to savings account
         if row["Product"] == "Deposit":
             return None
 
+        amount = Decimal(row["Amount"])
         currency = row["Currency"]
         cleared = row["State"] == "COMPLETED"
         posterior_bal = Amount(Decimal(row["Balance"]), currency)
         meta = {"csvid": self.get_csv_id(row)}
 
-        date = dt.strptime(row["Started Date"], "%Y-%m-%d %H:%M:%S")
-        aux_date = (
-            dt.strptime(row["Completed Date"], "%Y-%m-%d %H:%M:%S")
-            if row["Completed Date"]
-            else None
-        )
-        if aux_date and (date.date() == aux_date.date()):
-            aux_date = None
+        date_start = dt.strptime(row["Started Date"], "%Y-%m-%d %H:%M:%S")
+        date_comp = dt.strptime(row["Completed Date"], "%Y-%m-%d %H:%M:%S")
+        if date_start.date() == date_comp.date():
+            date_comp = None
 
         _prefixes = re.compile(r"(From |To |Payment from )")
         payee = re.sub(_prefixes, "", row["Description"])
         payee = self.lgr.get_autosync_payee(payee, self.name)
 
-        if row["Type"] == "TOPUP":
-            reverse = True
-            acct_from = "Assets:Other"
-            amt_from = Amount(amt, currency, reverse=reverse)
-            acct_to = self.name
-            amt_to = Amount(amt, currency, reverse=not reverse)
-        else:
-            reverse = False
-            acct_from = self.name
-            amt_from = Amount(amt, currency, reverse=reverse)
-            acct_to = self.mk_dynamic_account(payee, exclude=self.name)
-            amt_to = Amount(amt, currency, reverse=not reverse)
+        posting_dst = Posting(
+            account=self.mk_dynamic_account(payee, exclude=self.name),
+            amount=Amount(amount, currency, reverse=True),
+        )
+        posting_src = Posting(
+            account=self.name,
+            amount=Amount(amount, currency),
+            asserted=posterior_bal,
+            metadata=meta,
+        )
+        postings = [posting_dst, posting_src]
 
-        posting_to = Posting(
-            acct_to,
-            amt_to,
-            asserted=posterior_bal if acct_to == self.name else None,
-            metadata=meta if acct_to == self.name else {},
-        )
-        posting_from = Posting(
-            acct_from,
-            amt_from,
-            asserted=posterior_bal if acct_from == self.name else None,
-            metadata=meta if acct_from == self.name else {},
-        )
-        posting_fee = (
-            Posting(
+        if row["Fee"] != "0.00":
+            posting_fee = Posting(
                 "Expenses:Finance:Revolut",
                 Amount(Decimal(row["Fee"]), currency, reverse=True),
             )
-            if row["Fee"] != "0.00"
-            else None
-        )
-
-        postings = [posting_to, posting_from]
-        if posting_fee:
             postings.append(posting_fee)
             postings.append(posting_fee.clone_inverted(self.name))
+
         return Transaction(
-            date=date,
+            date=date_start,
             cleared=cleared,
-            aux_date=aux_date,
+            aux_date=date_comp,
             date_format="%Y/%m/%d",
             payee=payee,
             postings=postings,
