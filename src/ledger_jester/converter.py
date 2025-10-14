@@ -313,7 +313,7 @@ class RevolutConverter(CsvConverter):
         )
         posting_fee = (
             Posting(
-                "Expenses:Bank Charges",
+                "Expenses:Finance:Revolut",
                 Amount(Decimal(row["Fee"]), currency, reverse=True),
             )
             if row["Fee"] != "0.00"
