@@ -1,6 +1,6 @@
-import datetime
 import hashlib
 import re
+from datetime import datetime as dt
 from decimal import Decimal
 
 
@@ -141,22 +141,6 @@ class Amount:
 
 
 class Converter(object):
-    @staticmethod
-    def clean_id(id):
-        return (
-            id.replace("/", "_")
-            .replace("$", "_")
-            .replace(" ", "_")
-            .replace("@", "_")
-            .replace("*", "_")
-            .replace("+", "_")
-            .replace("&", "_")
-            .replace("[", "_")
-            .replace("]", "_")
-            .replace("|", "_")
-            .replace("%", "_")
-        )
-
     def __init__(
         self,
         ledger=None,
@@ -187,8 +171,46 @@ class Converter(object):
             else:
                 return account
 
+    @staticmethod
+    def clean_id(id):
+        return (
+            id.replace("/", "_")
+            .replace("$", "_")
+            .replace(" ", "_")
+            .replace("@", "_")
+            .replace("*", "_")
+            .replace("+", "_")
+            .replace("&", "_")
+            .replace("[", "_")
+            .replace("]", "_")
+            .replace("|", "_")
+            .replace("%", "_")
+        )
+
 
 class CsvConverter(Converter):
+    def __init__(
+        self,
+        dialect,
+        name=None,
+        indent=4,
+        ledger=None,
+        unknownaccount=None,
+        payee_format=None,
+        date_format=None,
+        infer_account=True,
+    ):
+        super(CsvConverter, self).__init__(
+            ledger=ledger,
+            indent=indent,
+            unknownaccount=unknownaccount,
+            payee_format=payee_format,
+            date_format=date_format,
+            infer_account=infer_account,
+        )
+        self.name = name
+        self.dialect = dialect
+
     @staticmethod
     def make_converter(fieldset, dialect, name=None, **kwargs):
         for klass in CsvConverter.descendants():
@@ -211,28 +233,6 @@ class CsvConverter(Converter):
         for key in sorted(row.keys()):
             h.update(("%s=%s\n" % (key, row[key])).encode("utf-8"))
         return h.hexdigest()
-
-    def __init__(
-        self,
-        dialect,
-        name=None,
-        indent=4,
-        ledger=None,
-        unknownaccount=None,
-        payee_format=None,
-        date_format=None,
-        infer_account=True,
-    ):
-        super(CsvConverter, self).__init__(
-            ledger=ledger,
-            indent=indent,
-            unknownaccount=unknownaccount,
-            payee_format=payee_format,
-            date_format=date_format,
-            infer_account=infer_account,
-        )
-        self.name = name
-        self.dialect = dialect
 
     def format_payee(self, row):
         return re.sub(r"\s+", " ", self.payee_format.format(**row).strip())
@@ -270,12 +270,21 @@ class RevolutConverter(CsvConverter):
 
         currency = row["Currency"]
         cleared = row["State"] == "COMPLETED"
+        posterior_bal = Amount(Decimal(row["Balance"]), currency)
+        meta = {"csvid": self.get_csv_id(row)}
+
+        date = dt.strptime(row["Started Date"], "%Y-%m-%d %H:%M:%S")
+        aux_date = (
+            dt.strptime(row["Completed Date"], "%Y-%m-%d %H:%M:%S")
+            if row["Completed Date"]
+            else None
+        )
+        if aux_date and (date.date() == aux_date.date()):
+            aux_date = None
 
         _prefixes = re.compile(r"(From |To |Payment from )")
         payee = re.sub(_prefixes, "", row["Description"])
-
         payee = self.lgr.get_autosync_payee(payee, self.name)
-        posterior_bal = Amount(Decimal(row["Balance"]), currency)
 
         if row["Type"] == "TOPUP":
             reverse = True
@@ -290,8 +299,12 @@ class RevolutConverter(CsvConverter):
             acct_to = self.mk_dynamic_account(payee, exclude=self.name)
             amt_to = Amount(amt, currency, reverse=not reverse)
 
-        meta = {"csvid": self.get_csv_id(row)}
-
+        posting_to = Posting(
+            acct_to,
+            amt_to,
+            asserted=posterior_bal if acct_to == self.name else None,
+            metadata=meta if acct_to == self.name else {},
+        )
         posting_from = Posting(
             acct_from,
             amt_from,
@@ -306,25 +319,6 @@ class RevolutConverter(CsvConverter):
             if row["Fee"] != "0.00"
             else None
         )
-        posting_to = Posting(
-            acct_to,
-            amt_to,
-            asserted=posterior_bal if acct_to == self.name else None,
-            metadata=meta if acct_to == self.name else {},
-        )
-
-        date = datetime.datetime.strptime(
-            row["Started Date"], "%Y-%m-%d %H:%M:%S"
-        )
-        aux_date = (
-            datetime.datetime.strptime(
-                row["Completed Date"], "%Y-%m-%d %H:%M:%S"
-            )
-            if row["Completed Date"]
-            else None
-        )
-        if aux_date and (date.date() == aux_date.date()):
-            aux_date = None
 
         postings = [posting_to, posting_from]
         if posting_fee:

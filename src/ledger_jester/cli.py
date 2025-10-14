@@ -26,7 +26,9 @@ def import_csv(ledger, args):
         ledger, payee_format=args.payee_format, date_format=args.date_format
     )
     txns = sync.parse_file(
-        args.PATH, accountname=args.account, unknownaccount=args.unknownaccount
+        args.fpath,
+        accountname=args.account,
+        unknownaccount=args.unknownaccount,
     )
     for txn in txns:
         if txn is not None:
@@ -39,18 +41,14 @@ def run(args=None, config=None):
 
     parser = argparse.ArgumentParser(description="Synchronize ledger.")
     parser.add_argument(
-        "PATH",
-        nargs="?",
-        help="do not sync; import from OFX \
-file",
+        "fpath", type=str, metavar="FILE", help="csv file to be ingested."
     )
     parser.add_argument(
         "-a",
         "--account",
         type=str,
         default=None,
-        help="sync only the named account; \
-if importing from file, set account name for import",
+        help="account name for the file provided",
     )
     parser.add_argument(
         "-l",
@@ -58,6 +56,7 @@ if importing from file, set account name for import",
         type=str,
         default=None,
         help="specify ledger file to READ for syncing",
+        metavar="LEDGER_FILE",
     )
     parser.add_argument(
         "--rules",
