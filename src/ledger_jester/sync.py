@@ -1,7 +1,7 @@
 import codecs
 import csv
 
-from ledger_jester.converter import CsvConverter
+from ledger_jester.converter import CsvConverter, RevolutConverter
 
 
 class CsvSynchronizer:
@@ -49,6 +49,9 @@ class CsvSynchronizer:
             else:
                 f.seek(3)
             reader = csv.DictReader(f, dialect=dialect)
+
+            if isinstance(converter, RevolutConverter):
+                reader = sorted(reader, key=lambda x: x["Completed Date"])
 
             res = []
             for row in reader:

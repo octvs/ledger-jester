@@ -280,11 +280,12 @@ class RevolutConverter(CsvConverter):
 
         if row["Product"] == "Deposit":
             acct_src = self.name + ":Savings"
-            # TODO: For now ignore internal transfer logs from savings
-            if row["Type"] == "Transfer":
-                return None
-            assert row["Type"] == "Interest"
-            acct_dst = "Income:Interest:Revolut"
+            if row["Type"] == "Transfer":  # Cross xact, use as bal assertion
+                amount = Decimal("0.0")
+                acct_dst = None
+            else:
+                assert row["Type"] == "Interest"  # Rest is not implemented.
+                acct_dst = "Income:Interest:Revolut"
         else:
             acct_src = self.name + ":Checking"
             acct_dst = self.mk_dynamic_account(payee, exclude=acct_src)
@@ -303,6 +304,9 @@ class RevolutConverter(CsvConverter):
             "Expenses:Finance:Revolut", Amount(fee, currency)
         )
         postings = [posting_dst, posting_src]
+
+        if not acct_dst:
+            postings = postings[1:]
 
         if fee > 0:
             postings.append(posting_fee)
