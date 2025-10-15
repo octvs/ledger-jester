@@ -256,6 +256,8 @@ class RevolutConverter(CsvConverter):
 
     def __init__(self, *args, **kwargs):
         super(RevolutConverter, self).__init__(*args, **kwargs)
+        if self.name is None:
+            self.name = "Assets:Bank:Revolut"
 
     def convert(self, row):
         # Ignore reverted xacts

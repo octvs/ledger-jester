@@ -17,10 +17,6 @@ def find_ledger_file():
 
 
 def import_csv(ledger, args):
-    if args.account is None:
-        raise Exception(
-            "When importing a CSV file, you must specify an account name."
-        )
     sync = CsvSynchronizer(
         ledger, payee_format=args.payee_format, date_format=args.date_format
     )
@@ -116,6 +112,5 @@ found by payee",
         logging.basicConfig(level=logging.DEBUG)
 
     ledger = Ledger(ledger_file=ledger_file, no_pipe=True)
-
 
     import_csv(ledger, args)
