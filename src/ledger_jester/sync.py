@@ -51,7 +51,9 @@ class CsvSynchronizer:
             reader = csv.DictReader(f, dialect=dialect)
 
             if isinstance(converter, RevolutConverter):
-                reader = sorted(reader, key=lambda x: x["Completed Date"])
+                reader = sorted(
+                    reader, key=lambda x: x["Completed Date"] + x["Product"]
+                )
 
             res = []
             for row in reader:
