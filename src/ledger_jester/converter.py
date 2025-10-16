@@ -1,5 +1,6 @@
 import hashlib
 import re
+from csv import DictReader
 from datetime import datetime as dt
 from decimal import Decimal
 
@@ -262,7 +263,14 @@ class RevolutConverter(CsvConverter):
         if self.name is None:
             self.name = "Assets:Bank:Revolut"
 
-    def preprocess(self, reader):
+    def preprocess(self, reader: DictReader) -> list[dict]:
+        """
+        Preprocess logs to sort based on date and account type.
+
+        The converter expects the cross postings between current and deposit
+        account to be consequent. This is required for balance assertions for
+        the latter to work.
+        """
         return sorted(reader, key=lambda x: x["Completed Date"] + x["Product"])
 
     def convert(self, row):
