@@ -383,3 +383,49 @@ class AmazonVisaConverter(CsvConverter):
         elif currency == "€":
             currency = "EUR"
         return currency
+
+
+class WalletConverter(CsvConverter):
+    FIELDSET = set(["Date", "Payee", "Amount", "Currency", "Balance"])
+
+    def __init__(self, *args, **kwargs):
+        super(WalletConverter, self).__init__(*args, **kwargs)
+        if self.name is None:
+            self.name = "Assets:Cash:Wallet"
+
+    @staticmethod
+    def mk_currency(currency):
+        return "EUR" if currency == "" else currency
+
+    def convert(self, row):
+        if row is None:
+            return None
+
+        date = dt.strptime(row["Date"], "%Y%m%d")
+        amount = Decimal(row["Amount"])
+        currency = self.mk_currency(row["Currency"])
+        bal = Decimal(row["Balance"]) if row["Balance"] != "" else None
+        meta = {"csvid": self.get_csv_id(row)}
+        payee = self.lgr.get_autosync_payee(row["Payee"], self.name)
+        acct_dst = self.mk_dynamic_account(payee, exclude=self.name)
+
+        posting_dst = Posting(
+            account=acct_dst,
+            amount=Amount(amount, currency, reverse=True),
+        )
+        posting_src = Posting(
+            account=self.name,
+            amount=Amount(amount, currency),
+            asserted=Amount(bal, currency) if bal else None,
+            metadata=meta,
+        )
+
+        postings = [posting_dst, posting_src]
+
+        return Transaction(
+            date=date,
+            cleared=True,
+            date_format="%Y/%m/%d",
+            payee=payee,
+            postings=postings,
+        )
