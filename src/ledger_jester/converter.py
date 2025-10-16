@@ -211,6 +211,9 @@ class CsvConverter(Converter):
         self.name = name
         self.dialect = dialect
 
+    def preprocess(self, reader):
+        return reader
+
     @staticmethod
     def make_converter(fieldset, dialect, name=None, **kwargs):
         for klass in CsvConverter.descendants():
@@ -258,6 +261,9 @@ class RevolutConverter(CsvConverter):
         super(RevolutConverter, self).__init__(*args, **kwargs)
         if self.name is None:
             self.name = "Assets:Bank:Revolut"
+
+    def preprocess(self, reader):
+        return sorted(reader, key=lambda x: x["Completed Date"] + x["Product"])
 
     def convert(self, row):
         # Ignore reverted xacts
@@ -392,16 +398,29 @@ class WalletConverter(CsvConverter):
         super(WalletConverter, self).__init__(*args, **kwargs)
         if self.name is None:
             self.name = "Assets:Cash:Wallet"
+        self.date = None
 
     @staticmethod
     def mk_currency(currency):
         return "EUR" if currency == "" else currency
 
+    def preprocess(self, reader):
+        _reader = list(reader)
+        self.date = _reader[0]["Date"][:6]  # assuming %Y%m%d
+        return _reader
+
+    def mk_date(self, date):
+        if len(date) == 2:
+            date = self.date + date
+        elif len(date) == 4:
+            date = self.date[:4] + date
+        return date
+
     def convert(self, row):
         if row is None:
             return None
 
-        date = dt.strptime(row["Date"], "%Y%m%d")
+        date = dt.strptime(self.mk_date(row["Date"]), "%Y%m%d")
         amount = Decimal(row["Amount"])
         currency = self.mk_currency(row["Currency"])
         bal = Decimal(row["Balance"]) if row["Balance"] != "" else None
