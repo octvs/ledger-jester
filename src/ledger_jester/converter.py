@@ -270,7 +270,7 @@ class RevolutConverter(CsvConverter):
         fee = Decimal(row["Fee"])
         currency = row["Currency"]
         cleared = row["State"] == "COMPLETED"
-        posterior_bal = Amount(Decimal(row["Balance"]), currency)
+        posterior_bal = Decimal(row["Balance"])
         meta = {"csvid": self.get_csv_id(row)}
 
         if date_start.date() == date_comp.date():
@@ -299,7 +299,7 @@ class RevolutConverter(CsvConverter):
         posting_src = Posting(
             account=acct_src,
             amount=Amount(amount - fee, currency),
-            asserted=posterior_bal,
+            asserted=Amount(posterior_bal, currency),
             metadata=meta,
         )
         posting_fee = Posting(
