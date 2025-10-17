@@ -212,8 +212,8 @@ class CsvConverter(Converter):
         self.name = name
         self.dialect = dialect
 
-    def preprocess(self, reader):
-        return reader
+    def preprocess(self, reader: DictReader) -> list[dict]:
+        return list(reader)
 
     @staticmethod
     def make_converter(fieldset, dialect, name=None, **kwargs):
@@ -412,7 +412,15 @@ class WalletConverter(CsvConverter):
     def mk_currency(currency):
         return "EUR" if currency == "" else currency
 
-    def preprocess(self, reader):
+    def preprocess(self, reader: DictReader) -> list[dict]:
+        """
+        Preprocess logs to deduce date.
+
+        Since csv logs for wallet are intended to be written by hand this
+        converter allows user to abstain year and month parts of a date if it
+        is same with the first row of the csv. For this purpose we set the
+        class date variable ("%Y%m") from the first row.
+        """
         _reader = list(reader)
         self.date = _reader[0]["Date"][:6]  # assuming %Y%m%d
         return _reader
