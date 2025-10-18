@@ -356,8 +356,19 @@ class AmazonVisaConverter(CsvConverter):
         if self.name is None:
             self.name = "Liabilities:CreditCard:Amazon"
 
+    def get_csv_id(self, row: dict):
+        """
+        Get csv id for a row ignoring 'Punkte' column.
+
+        Aforementioned column gets updated with a delay around 3-5 days with
+        which we don't want to update our logs, hence ignore it for csvid.
+        """
+        # This later can be revoked in case we start handling the "Punkte" col
+        _row = dict(row)
+        del _row["Punkte"]
+        return super(AmazonVisaConverter, self).get_csv_id(_row)
+
     def convert(self, row):
-        # TODO: Currently we don't handle Amazon Points on "Punkte" col
         if row is None:
             return None
 
