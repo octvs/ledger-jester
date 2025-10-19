@@ -1,22 +1,13 @@
 #!/usr/bin/env nix
 #! nix shell github:tomberek/-#python3With.pandas nixpkgs#xan --command python
 
-import subprocess
 import sys
 from pathlib import Path
 
 import pandas as pd
 
 fpath = Path(sys.argv[1])
-if fpath.suffix == ".xls":
-    _fpath = fpath.with_suffix(".csv")
-    subprocess.run([f"xan from {fpath} | tail +10 >{_fpath}"], shell=True)
-    fpath = _fpath
-elif fpath.suffix != ".csv":
-    print(f"Unsupported file extension provided: {fpath.suffix}")
-    exit()
-
-df = pd.read_csv(fpath).dropna(how="all")
+df = pd.read_excel(fpath, header=10).dropna(how="all")
 df["dt"] = pd.to_datetime(
     df["Datum"] + " " + df["Zeit"], format="%d.%m.%Y %H:%M Uhr"
 )
