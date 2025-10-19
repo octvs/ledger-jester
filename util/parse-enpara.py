@@ -1,24 +1,78 @@
 #!/usr/bin/env nix
-#! nix shell github:tomberek/-#python3With.pandas --command python
+#! nix shell github:tomberek/-#python3With.pandas.xlrd --command python
 
+import logging
 import sys
 from pathlib import Path
 
 import pandas as pd
 
-fpath = Path(sys.argv[1])
-if fpath.suffix != ".csv":
-    print(
-        f"Unsupported file extension provided: {fpath.suffix}\n"
-        + "xls parsing is not supported due to format and encoding of the enpara export.\n"
-        + "First export the necessary table to csv (i.e. via libreoffice)."
-    )
-    exit()
+
+def clean_enpara_excel(df: pd.DataFrame) -> pd.DataFrame:
+    headers = df.iloc[9, :]
+    content = df[df.iloc[:, 3].notna()].dropna(how="all", axis=1)
+    content.columns = headers.dropna()
+    return content
 
 
-df = pd.read_csv(fpath).dropna(how="all")
-df["dt"] = pd.to_datetime(df["Tarih"], format="%d.%m.%Y")
-for _, month in df.groupby(pd.Grouper(key="dt", freq="ME")):
-    dt = month["dt"].reset_index(drop=True)[0].strftime("%Y%m")
-    fname = f"out/{dt}-enpara.csv"
-    month = month.drop("dt", axis=1).to_csv(fname, index=False)
+def get_cross_xact(df: pd.DataFrame) -> pd.DataFrame:
+    return df[df["Hareket tipi"].str.contains("Transfer")].head(1)
+
+
+def criss_cross_dfs(df1: pd.DataFrame, df2: pd.DataFrame) -> pd.DataFrame:
+    cross_xact = get_cross_xact(df1)
+    if cross_xact.empty:  # If no cross xact return immediately
+        return pd.concat([df1, df2])
+    _df1 = df1.reset_index()
+    _df2 = df2.reset_index()
+    src_xact = get_cross_xact(_df1)
+    amount = src_xact["İşlem Tutarı (TL)"].iloc[0]
+    dst_xact = _df2[_df2.loc[:, "İşlem Tutarı (TL)"] == amount * -1]
+    block0 = _df1.loc[: src_xact.index[0] - 1]
+    block1 = _df2.loc[: dst_xact.index[0]]
+    res = pd.concat([block0, block1, src_xact])
+    block2 = _df1.loc[src_xact.index[0] + 1 :].set_index("index")
+    block3 = _df2.loc[dst_xact.index[0] + 1 :].set_index("index")
+    rest = criss_cross_dfs(block2, block3)  # Recurse for more cross xacts left
+    return pd.concat([res, rest]).set_index("index")
+
+
+def merge_dfs(df1: pd.DataFrame, df2: pd.DataFrame) -> pd.DataFrame:
+    span = [df1["Tarih"].min(), df1["Tarih"].max()]
+    merged = pd.DataFrame()
+    for i in range((span[1] - span[0]).days + 1):  # Iterate over days
+        date = span[0] + pd.Timedelta(days=i)
+        logging.debug(f"Processing f{date.date}")
+        xacts1 = df1[df1["Tarih"] == date]
+        xacts2 = df2[df2["Tarih"] == date]
+        res = criss_cross_dfs(xacts1, xacts2)
+        merged = pd.concat([merged, res])
+    return merged
+
+
+def main():
+    fpath = Path(sys.argv[1])
+    df1 = pd.read_excel(fpath)
+    df1 = clean_enpara_excel(df1)
+    df1["Tarih"] = pd.to_datetime(df1["Tarih"], format="%d/%m/%Y")
+    df1 = df1.iloc[::-1]
+    df1["Hesap"] = "Vadesiz"
+
+    fpath2 = Path(sys.argv[2])
+    df2 = pd.read_excel(fpath2)
+    df2 = clean_enpara_excel(df2)
+    df2["Tarih"] = pd.to_datetime(df2["Tarih"], format="%d.%m.%Y")
+    df2 = df2.iloc[::-1]
+    df2["Hesap"] = "Birikim"
+
+    df = merge_dfs(df2, df1)
+    assert len(df) == len(df1) + len(df2)  # assert no xact was lost
+
+    for _, month in df.groupby(pd.Grouper(key="Tarih", freq="ME")):
+        dt = month["Tarih"].reset_index(drop=True)[0].strftime("%Y%m")
+        fname = f"out/{dt}-enpara.csv"
+        month = month.to_csv(fname, index=False)
+
+
+if __name__ == "__main__":
+    main()
