@@ -1,6 +1,15 @@
 #!/usr/bin/env nix
 #! nix shell github:tomberek/-#python3With.pandas.xlrd --command python
 
+"""
+Parser for enpara exported excel files.
+
+The problem with enpara is that is provides separate exports for its savings
+and checking account, but no complete timestamps, only dates. Therefore if you
+want balance assertions to work, you should merge these logs appropriately.
+This is done on this script via `criss_cross_dfs` function.
+"""
+
 import logging
 import sys
 from pathlib import Path
