@@ -1,5 +1,4 @@
-#!/usr/bin/env nix
-#! nix shell github:tomberek/-#python3With.pandas.xlrd --command python
+#!/usr/bin/env python
 
 """
 Parser for enpara exported excel files.

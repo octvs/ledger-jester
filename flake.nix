@@ -16,7 +16,7 @@
         pkgs = nixpkgs.legacyPackages.${system};
         runtimeDeps = with pkgs.python3Packages; [ledger];
         buildDeps = with pkgs.python3Packages; [setuptools];
-        devDeps = with pkgs.python3Packages; [pandas pandas-stubs];
+        devDeps = with pkgs.python3Packages; [pandas pandas-stubs xlrd];
       in {
         packages.default = pkgs.python3Packages.buildPythonApplication {
           pname = "ledger-jester";

@@ -1,5 +1,4 @@
-#!/usr/bin/env nix
-#! nix shell github:tomberek/-#python3With.pandas nixpkgs#xan --command python
+#!/usr/bin/env python
 
 import sys
 from pathlib import Path
