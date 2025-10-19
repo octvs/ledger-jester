@@ -1,4 +1,5 @@
 .direnv
 **/__pycache__
 data
-util/out
+*.xls
+*.csv
