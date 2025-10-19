@@ -6,6 +6,12 @@ A stripped down fork of [ledger-autosync](github.com/egh/ledger-autosync).
 
 - [ ] New converters
   - [ ] Enpara
+- [ ] Cross Posts
+  - This becomes an issue when you consider peripheral accounts, like Paypal or
+    TF-Bank. For these we can create a new account for example
+    "Assets:InTransfer". Each converter can direct money to there and withdraw
+    from there when received. If wanted it can be suffixed per destination
+    ":TFBank" for transfers going there.
 - [ ] Merge w/ upstream
   - [ ] Find out how to merge w/ upstream by placing upstream components back
         into this repo, testing the newly implemented functionality along the
