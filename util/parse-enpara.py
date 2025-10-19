@@ -17,11 +17,18 @@ from pathlib import Path
 import pandas as pd
 
 
-def clean_enpara_excel(df: pd.DataFrame) -> pd.DataFrame:
-    headers = df.iloc[9, :]
-    content = df[df.iloc[:, 3].notna()].dropna(how="all", axis=1)
-    content.columns = headers.dropna()
-    return content
+def read_enpara_excel(
+    fpath: Path, _date_format: str = "%d/%m/%Y"
+) -> pd.DataFrame:
+    df1 = pd.read_excel(
+        fpath,
+        header=10,
+        usecols=[3, 5, 8, 11, 13],
+        skipfooter=4,
+        parse_dates=[0],
+        date_format=_date_format,
+    )
+    return df1.rename(columns={df1.columns[0]: "Tarih"}).iloc[::-1]
 
 
 def get_cross_xact(df: pd.DataFrame) -> pd.DataFrame:
@@ -60,18 +67,10 @@ def merge_dfs(df1: pd.DataFrame, df2: pd.DataFrame) -> pd.DataFrame:
 
 
 def main():
-    fpath = Path(sys.argv[1])
-    df1 = pd.read_excel(fpath)
-    df1 = clean_enpara_excel(df1)
-    df1["Tarih"] = pd.to_datetime(df1["Tarih"], format="%d/%m/%Y")
-    df1 = df1.iloc[::-1]
+    df1 = read_enpara_excel(Path(sys.argv[1]))
     df1["Hesap"] = "Vadesiz"
 
-    fpath2 = Path(sys.argv[2])
-    df2 = pd.read_excel(fpath2)
-    df2 = clean_enpara_excel(df2)
-    df2["Tarih"] = pd.to_datetime(df2["Tarih"], format="%d.%m.%Y")
-    df2 = df2.iloc[::-1]
+    df2 = read_enpara_excel(Path(sys.argv[2]), "%d.%m.%Y")
     df2["Hesap"] = "Birikim"
 
     df = merge_dfs(df2, df1)
