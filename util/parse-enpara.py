@@ -14,6 +14,7 @@ import sys
 from pathlib import Path
 
 import pandas as pd
+from tqdm import tqdm
 
 
 def read_enpara_excel(fpath: Path) -> pd.DataFrame:
@@ -53,9 +54,8 @@ def criss_cross_dfs(df1: pd.DataFrame, df2: pd.DataFrame) -> pd.DataFrame:
 def merge_dfs(df1: pd.DataFrame, df2: pd.DataFrame) -> pd.DataFrame:
     span = [df1["Tarih"].min(), df1["Tarih"].max()]
     merged = pd.DataFrame()
-    for i in range((span[1] - span[0]).days + 1):  # Iterate over days
+    for i in tqdm(range((span[1] - span[0]).days + 1)):  # Iterate over days
         date = span[0] + pd.Timedelta(days=i)
-        logging.debug(f"Processing f{date.date}")
         xacts1 = df1[df1["Tarih"] == date]
         xacts2 = df2[df2["Tarih"] == date]
         res = criss_cross_dfs(xacts1, xacts2)
