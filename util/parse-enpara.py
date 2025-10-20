@@ -16,16 +16,14 @@ from pathlib import Path
 import pandas as pd
 
 
-def read_enpara_excel(
-    fpath: Path, _date_format: str = "%d/%m/%Y"
-) -> pd.DataFrame:
+def read_enpara_excel(fpath: Path) -> pd.DataFrame:
     df1 = pd.read_excel(
         fpath,
         header=10,
         usecols=[3, 5, 8, 11, 13],
         skipfooter=4,
         parse_dates=[0],
-        date_format=_date_format,
+        date_format="%d.%m.%Y",
     )
     return df1.rename(columns={df1.columns[0]: "Tarih"}).iloc[::-1]
 
@@ -69,7 +67,7 @@ def main():
     df1 = read_enpara_excel(Path(sys.argv[1]))
     df1["Hesap"] = "Vadesiz"
 
-    df2 = read_enpara_excel(Path(sys.argv[2]), "%d.%m.%Y")
+    df2 = read_enpara_excel(Path(sys.argv[2]))
     df2["Hesap"] = "Birikim"
 
     df = merge_dfs(df2, df1)
