@@ -28,7 +28,7 @@ class EnparaConverter(CsvConverter):
 
     def filter_payee_names(self, payee: str) -> str:
         payee = payee.split(",")[0]
-        _prefixes = re.compile(r"\%\S* kampanyalı faiz oranı ile 1 g")
+        _prefixes = re.compile(r"\%\S*( kampanyalı)* faiz oranı ile 1 g")
         return re.sub(_prefixes, "G", payee)
 
     def convert(self, row):
@@ -46,9 +46,8 @@ class EnparaConverter(CsvConverter):
 
         if row["Hesap"] == "Birikim":
             acct_src = self.name + ":Savings"
-            if (
-                "Transfer" in row["Hareket tipi"]
-            ):  # Cross xact, use as bal assertion
+            if "Transfer" in row["Hareket tipi"]:
+                # Cross xact, use as bal assertion
                 amount = Decimal("0.0")
                 acct_dst = None
             else:
