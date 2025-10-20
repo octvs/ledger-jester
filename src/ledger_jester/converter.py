@@ -275,6 +275,10 @@ class RevolutConverter(CsvConverter):
         """
         return sorted(reader, key=lambda x: x["Completed Date"] + x["Product"])
 
+    def filter_payee_names(self, payee: str) -> str:
+        _prefixes = re.compile(r"(From |To |Payment from )")
+        return re.sub(_prefixes, "", payee)
+
     def convert(self, row):
         # Ignore reverted xacts
         if row is None or (row["State"] in ["REVERTED", "PENDING"]):
@@ -292,8 +296,7 @@ class RevolutConverter(CsvConverter):
         if date_start.date() == date_comp.date():
             date_comp = None
 
-        _prefixes = re.compile(r"(From |To |Payment from )")
-        payee = re.sub(_prefixes, "", row["Description"])
+        payee = self.filter_payee_names(row["Description"])
         payee = self.lgr.get_autosync_payee(payee, self.name)
 
         if row["Product"] == "Deposit":
