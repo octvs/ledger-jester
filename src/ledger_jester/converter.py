@@ -241,3 +241,6 @@ class CsvConverter(Converter):
 
     def format_payee(self, row):
         return re.sub(r"\s+", " ", self.payee_format.format(**row).strip())
+
+    def filter_payee_names(self, payee: str) -> str:
+        return payee
