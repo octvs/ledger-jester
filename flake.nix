@@ -1,5 +1,5 @@
 {
-  description = "Python application flake";
+  description = "A stripped down fork of ledger-autosync";
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";

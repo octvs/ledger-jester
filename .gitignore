@@ -1,5 +1,11 @@
+# Python artifacts
+__pycache__/
+*.egg-info/
+
+# Dev-env artifacts
 .direnv
-**/__pycache__
+
+# Rest
 data
 *.xls
 *.csv
