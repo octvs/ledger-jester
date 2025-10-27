@@ -1,28 +1,30 @@
 import re
 from datetime import datetime as dt
 from decimal import Decimal
+from types import SimpleNamespace
 
 from ledger_jester.converter import Amount, CsvConverter, Posting, Transaction
 
 
 class RevolutConverter(CsvConverter):
-    FIELDSET = set(
-        [
-            "Type",
-            "Product",
-            "Started Date",
-            "Completed Date",
-            "Description",
-            "Amount",
-            "Fee",
-            "Currency",
-            "State",
-            "Balance",
-        ]
-    )
+    COLS = {
+        "_": "Type",
+        "acc_type": "Product",
+        "date0": "Started Date",
+        "date1": "Completed Date",
+        "payee": "Description",
+        "amount": "Amount",
+        "fee": "Fee",
+        "currency": "Currency",
+        "state": "State",
+        "balance": "Balance",
+    }
+    DATE_FORMAT = "%Y-%m-%d %H:%M:%S"
+    FIELDSET = set(COLS.values())
 
     def __init__(self, *args, **kwargs):
         super(RevolutConverter, self).__init__(*args, **kwargs)
+        self.cols = SimpleNamespace(**self.COLS)
         if self.name is None:
             self.name = "Assets:Bank:Revolut:Checking"
         # This can be later improved, I don't want to add a new cli flag now
@@ -45,19 +47,19 @@ class RevolutConverter(CsvConverter):
         if self.skip_row(row):
             return None
 
-        date_start = dt.strptime(row["Started Date"], "%Y-%m-%d %H:%M:%S")
-        date_comp = dt.strptime(row["Completed Date"], "%Y-%m-%d %H:%M:%S")
-        amount = Decimal(row["Amount"])
-        fee = Decimal(row["Fee"])
-        currency = row["Currency"]
-        cleared = row["State"] == "COMPLETED"
-        posterior_bal = Decimal(row["Balance"])
+        date_start = dt.strptime(row[self.cols.date0], self.DATE_FORMAT)
+        date_comp = dt.strptime(row[self.cols.date1], self.DATE_FORMAT)
+        amount = Decimal(row[self.cols.amount])
+        fee = Decimal(row[self.cols.fee])
+        currency = row[self.cols.currency]
+        cleared = row[self.cols.state] == "COMPLETED"
+        posterior_bal = Decimal(row[self.cols.balance])
         meta = {"csvid": self.get_csv_id(row)}
 
         if date_start.date() == date_comp.date():
             date_comp = None
 
-        payee = self.filter_payee_names(row["Description"])
+        payee = self.filter_payee_names(row[self.cols.payee])
         payee = self.lgr.get_autosync_payee(payee, self.name)
 
         acct_src = self.name
