@@ -1,5 +1,4 @@
 import re
-from csv import DictReader
 from datetime import datetime as dt
 from decimal import Decimal
 
@@ -25,25 +24,25 @@ class RevolutConverter(CsvConverter):
     def __init__(self, *args, **kwargs):
         super(RevolutConverter, self).__init__(*args, **kwargs)
         if self.name is None:
-            self.name = "Assets:Bank:Revolut"
-
-    def preprocess(self, reader: DictReader) -> list[dict]:
-        """
-        Preprocess logs to sort based on date and account type.
-
-        The converter expects the cross postings between current and deposit
-        account to be consequent. This is required for balance assertions for
-        the latter to work.
-        """
-        return sorted(reader, key=lambda x: x["Completed Date"] + x["Product"])
+            self.name = "Assets:Bank:Revolut:Checking"
+        # This can be later improved, I don't want to add a new cli flag now
+        self.acc_type = "Current"
+        if self.name.split(":")[-1] == "Savings":
+            self.acc_type = "Deposit"
 
     def filter_payee_names(self, payee: str) -> str:
         _prefixes = re.compile(r"(From |To |Payment from )")
         return re.sub(_prefixes, "", payee)
 
+    def skip_row(self, row) -> bool:
+        return (
+            row is None
+            or (row["State"] in ["REVERTED", "PENDING"])
+            or row["Product"] != self.acc_type
+        )
+
     def convert(self, row):
-        # Ignore reverted xacts
-        if row is None or (row["State"] in ["REVERTED", "PENDING"]):
+        if self.skip_row(row):
             return None
 
         date_start = dt.strptime(row["Started Date"], "%Y-%m-%d %H:%M:%S")
@@ -61,17 +60,8 @@ class RevolutConverter(CsvConverter):
         payee = self.filter_payee_names(row["Description"])
         payee = self.lgr.get_autosync_payee(payee, self.name)
 
-        if row["Product"] == "Deposit":
-            acct_src = self.name + ":Savings"
-            if row["Type"] == "Transfer":  # Cross xact, use as bal assertion
-                amount = Decimal("0.0")
-                acct_dst = None
-            else:
-                assert row["Type"] == "Interest"  # Rest is not implemented.
-                acct_dst = "Income:Interest:Revolut"
-        else:
-            acct_src = self.name + ":Checking"
-            acct_dst = self.mk_dynamic_account(payee, exclude=acct_src)
+        acct_src = self.name
+        acct_dst = self.mk_dynamic_account(payee, exclude=acct_src)
 
         posting_dst = Posting(
             account=acct_dst,
@@ -91,6 +81,7 @@ class RevolutConverter(CsvConverter):
         if not acct_dst:
             postings = postings[1:]
 
+        # If fee given on the FIELDSET, if not skip
         if fee > 0:
             postings.append(posting_fee)
 

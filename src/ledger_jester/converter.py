@@ -211,8 +211,11 @@ class CsvConverter(Converter):
         self.name = name
         self.dialect = dialect
 
-    def preprocess(self, reader: DictReader) -> list[dict]:
-        return list(reader)
+    def preprocess(self, reader: DictReader) -> DictReader | list:
+        return reader
+
+    def skip_row(self, row):
+        return row is not None
 
     @staticmethod
     def make_converter(fieldset, dialect, name=None, **kwargs):
