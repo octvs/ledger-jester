@@ -20,13 +20,16 @@ class EnparaCCConverter(CsvConverter):
             self.name = "Liabilities:CreditCard:Enpara"
         self.cols = SimpleNamespace(**self.COLS)
 
+    def read_amount(self, cell):
+        return Decimal(self.eu_decimal_to_us(cell.split(" ")[0])) * -1
+
     def convert(self, row):
         if row is None:
             return None
 
         currency = "TRY"
         date_start = dt.strptime(row[self.cols.date0], self.DATE_FORMAT)
-        amount = Decimal(row[self.cols.amount].split(" ")[0]) * -1
+        amount = self.read_amount(row[self.cols.amount])
         meta = {"csvid": self.get_csv_id(row)}
 
         payee = self.filter_payee_names(row[self.cols.payee])

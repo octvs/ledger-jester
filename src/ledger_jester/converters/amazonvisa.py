@@ -41,7 +41,7 @@ class AmazonVisaConverter(CsvConverter):
 
         date = dt.strptime(row["Datum"], "%d.%m.%Y ")
         _amount, _curr = row["Betrag"].split()
-        amount = Decimal(_amount.replace(",", "."))
+        amount = Decimal(self.eu_decimal_to_us(_amount))
         currency = self.mk_currency(_curr)
         meta = {"csvid": self.get_csv_id(row)}
         payee = self.lgr.get_autosync_payee(row["Beschreibung"], self.name)

@@ -247,3 +247,7 @@ class CsvConverter(Converter):
 
     def filter_payee_names(self, payee: str) -> str:
         return payee
+
+    @staticmethod
+    def eu_decimal_to_us(x):
+        return x.replace(".", "").replace(",", ".")
