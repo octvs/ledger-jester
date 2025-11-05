@@ -31,8 +31,11 @@ class EnparaConverter(CsvConverter):
         _prefixes = re.compile(r"\%\S*( kampanyalı)* faiz oranı ile 1 g")
         return re.sub(_prefixes, "G", payee)
 
+    def skip_row(self, row) -> bool:
+        return row is None
+
     def convert(self, row):
-        if row is None:
+        if self.skip_row(row):
             return None
 
         currency = "TRY"
