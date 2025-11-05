@@ -22,9 +22,9 @@ class EnparaConverter(CsvConverter):
 
     def __init__(self, *args, **kwargs):
         super(EnparaConverter, self).__init__(*args, **kwargs)
-        if self.name is None:
-            self.name = "Assets:Bank:Enpara"
         self.cols = SimpleNamespace(**self.COLS)
+        if self.name is None:
+            self.name = "Assets:Bank:Enpara:Checking"
 
     def filter_payee_names(self, payee: str) -> str:
         payee = payee.split(",")[0]
@@ -44,17 +44,8 @@ class EnparaConverter(CsvConverter):
         payee = self.filter_payee_names(row[self.cols.payee])
         payee = self.lgr.get_autosync_payee(payee, self.name)
 
-        if row["Hesap"] == "Birikim":
-            acct_src = self.name + ":Savings"
-            if "Transfer" in row["Hareket tipi"]:
-                # Cross xact, use as bal assertion
-                amount = Decimal("0.0")
-                acct_dst = None
-            else:
-                acct_dst = self.mk_dynamic_account(payee, exclude=acct_src)
-        else:
-            acct_src = self.name + ":Checking"
-            acct_dst = self.mk_dynamic_account(payee, exclude=acct_src)
+        acct_src = self.name
+        acct_dst = self.mk_dynamic_account(payee, exclude=acct_src)
 
         posting_dst = Posting(
             account=acct_dst,
