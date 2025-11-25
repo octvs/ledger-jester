@@ -15,3 +15,5 @@ A stripped down fork of [ledger-autosync](github.com/egh/ledger-autosync).
   - Fork
     - Add GPLv3 Licence
     - Fork and clean up until match with our initial commits
+  - Include functionalities of ledger-fx
+  - Better name? Where medieval merchants exchanged bonds, mahsup?
