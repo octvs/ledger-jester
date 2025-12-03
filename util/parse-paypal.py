@@ -16,7 +16,7 @@ for _, month in df.groupby(pd.Grouper(key="dt", freq="ME")):
     if month.empty:
         continue
     dt = month["dt"].reset_index(drop=True)[0].strftime("%Y%m")
-    fname = f"out/{dt}-paypal.csv"
+    fname = f"{dt}-paypal.csv"
     if Path(fname).exists():
         print("File already exists!")
         exit()

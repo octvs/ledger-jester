@@ -27,7 +27,7 @@ def main():
 
     for _, month in df.groupby(pd.Grouper(key="Tarih", freq="ME")):
         dt = month["Tarih"].reset_index(drop=True)[0].strftime("%Y%m")
-        fname = f"out/{dt}-enpara.csv"
+        fname = f"{dt}-enpara.csv"
         month = month.to_csv(fname, index=False)
 
 
