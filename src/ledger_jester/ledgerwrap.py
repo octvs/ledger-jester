@@ -115,6 +115,9 @@ class Ledger:
             return False
 
     def load_payees(self):
+        # TODO: Use only related payees? Like a graph
+        # If two candidates equal occurence include both
+        # Maybe if the spending same amunt use the same xact
         if self.payees is None:
             self.payees = {}
             r = self.run(["show", "--actual"])
