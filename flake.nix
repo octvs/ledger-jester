@@ -10,17 +10,18 @@
   outputs = inputs:
     inputs.flake-parts.lib.mkFlake {inherit inputs;} {
       systems = import inputs.systems;
-      perSystem = {pkgs, ...}: let
-        dependencies = with pkgs.python3.pkgs; [ledger] ++ [pkgs.ledger];
-        # devDeps = with pkgs.python3Packages; [pandas pandas-stubs xlrd tqdm];
-      in {
-        packages.default = pkgs.python3Packages.buildPythonApplication {
+      perSystem = {pkgs, ...}: {
+        packages.default = pkgs.python3Packages.buildPythonApplication rec {
           pname = "ledger-jester";
           version = "0-unstable";
           pyproject = true;
           src = ./.;
           build-system = with pkgs.python3.pkgs; [setuptools];
-          inherit dependencies;
+          dependencies = [pkgs.ledger] ++ optional-dependencies.parsers;
+          optional-dependencies.parsers = with pkgs.python3.pkgs; [
+            pandas
+            xlrd
+          ];
           dontCheckRuntimeDeps = true;
         };
       };

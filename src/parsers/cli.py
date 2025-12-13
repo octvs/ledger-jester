@@ -4,7 +4,10 @@ import argparse
 import logging
 import sys
 
-if __name__ == "__main__":
+from parsers import parser_factory
+
+
+def run():
     args = sys.argv[1:]
     if args is None:
         print("Must provide a parser to use.")
@@ -29,4 +32,5 @@ if __name__ == "__main__":
     if args.debug:
         logging.basicConfig(level=logging.DEBUG)
 
-    print(args)
+    parser = parser_factory(args.parser)
+    parser.parse(args.fpath)

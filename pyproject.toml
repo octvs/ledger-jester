@@ -10,4 +10,8 @@ requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
 
 [project.scripts]
-ledger-injest = "ledger_jester.cli:run"
+ledger-j = "ledger_jester.cli:run"
+ledger-p = "parsers.cli:run"
+
+[project.optional-dependencies]
+parsers = ["pandas", "xlrd"]
