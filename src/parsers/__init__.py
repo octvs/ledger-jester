@@ -1,6 +1,8 @@
 from abc import ABC, abstractmethod
 from pathlib import Path
 
+import pandas as pd
+
 
 class Parser(ABC):
     TYPE = None
@@ -13,9 +15,8 @@ class Parser(ABC):
     def parse_groups(self, group):
         pass
 
-    @abstractmethod
     def groups(self, df):
-        pass
+        return df.groupby(pd.Grouper(key="dt", freq="ME"))
 
     def parse(self, fpath):
         if not (out := Path("./out")).exists():
@@ -27,6 +28,9 @@ class Parser(ABC):
 
 
 def parser_factory(name):
+    from .amazonvisa import AmazonParser
+    from .enpara import EnparaParser
+    from .paypal import PaypalParser
     from .revolut import RevolutParser
 
     for klass in Parser.__subclasses__():
