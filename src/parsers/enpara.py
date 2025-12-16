@@ -12,7 +12,7 @@ class EnparaParser(Parser):
 
     TYPE = "enpara"
 
-    def read_file(fpath) -> pd.DataFrame:
+    def read_file(self, fpath) -> pd.DataFrame:
         df1 = pd.read_excel(
             fpath,
             header=10,
