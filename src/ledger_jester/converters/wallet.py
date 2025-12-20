@@ -28,21 +28,24 @@ class WalletConverter(CsvConverter):
         class date variable ("%Y%m") from the first row.
         """
         _reader = list(reader)
-        self.date = _reader[0]["Date"][:6]  # assuming %Y%m%d
+        month_year_string = _reader[0]["Date"][:6]  # assuming %Y%m%d
+        for row in _reader:
+            row["Date"] = self.mk_date(row["Date"], month_year_string)
         return _reader
 
-    def mk_date(self, date):
+    @staticmethod
+    def mk_date(date, month_year):
         if len(date) == 2:
-            date = self.date + date
+            date = month_year + date
         elif len(date) == 4:
-            date = self.date[:4] + date
+            date = month_year[:4] + date
         return date
 
     def convert(self, row):
         if row is None:
             return None
 
-        date = dt.strptime(self.mk_date(row["Date"]), "%Y%m%d")
+        date = dt.strptime(row["Date"], "%Y%m%d")
         amount = Decimal(row["Amount"])
         currency = self.mk_currency(row["Currency"])
         bal = Decimal(row["Balance"]) if row["Balance"] != "" else None
