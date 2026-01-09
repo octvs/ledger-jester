@@ -30,7 +30,7 @@ class PaypalParser(Parser):
         if month.empty:
             return None
         dt = month["dt"].reset_index(drop=True)[0].strftime("%Y%m")
-        fname = f"out/{dt}-paypal.csv"
+        fname = f"{dt}-paypal.csv"
         if Path(fname).exists():
             print("File already exists!")
             exit()

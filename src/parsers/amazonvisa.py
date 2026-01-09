@@ -20,5 +20,5 @@ class AmazonParser(Parser):
 
     def parse_groups(self, month):
         dt = month["dt"].reset_index(drop=True)[0].strftime("%Y%m")
-        fname = f"out/{dt}-amazonvisa.csv"
+        fname = f"{dt}-amazonvisa.csv"
         month = month.drop("dt", axis=1).to_csv(fname, index=False)

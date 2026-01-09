@@ -19,10 +19,7 @@ class Parser(ABC):
         return df.groupby(pd.Grouper(key="dt", freq="ME"))
 
     def parse(self, fpath):
-        if not (out := Path("./out")).exists():
-            out.mkdir()
-        fpath = Path(fpath)
-        df = self.read_file(fpath)
+        df = self.read_file(Path(fpath))
         for _, group in self.groups(df):
             self.parse_groups(group)
 

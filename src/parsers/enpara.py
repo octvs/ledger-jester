@@ -46,5 +46,5 @@ class EnparaParser(Parser):
 
     def parse_groups(self, group):
         dt = group["Tarih"].reset_index(drop=True)[0].strftime("%Y%m")
-        fname = f"out/{dt}-enpara{self.subtype}.csv"
+        fname = f"{dt}-enpara{self.subtype}.csv"
         group.to_csv(fname, index=False)
