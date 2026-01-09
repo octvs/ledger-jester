@@ -26,7 +26,7 @@ class EnparaParser(Parser):
     def groups(self, df):
         return df.groupby(pd.Grouper(key="Tarih", freq="ME"))
 
-    def parse_groups(self, month):
-        dt = month["Tarih"].reset_index(drop=True)[0].strftime("%Y%m")
+    def parse_groups(self, group):
+        dt = group["Tarih"].reset_index(drop=True)[0].strftime("%Y%m")
         fname = f"out/{dt}-enpara.csv"
-        month = month.to_csv(fname, index=False)
+        group.to_csv(fname, index=False)
