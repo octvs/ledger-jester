@@ -28,9 +28,10 @@ class WalletConverter(CsvConverter):
         class date variable ("%Y%m") from the first row.
         """
         _reader = list(reader)
-        month_year_string = _reader[0]["Date"][:6]  # assuming %Y%m%d
-        for row in _reader:
-            row["Date"] = self.mk_date(row["Date"], month_year_string)
+        if len(_reader) > 0:
+            month_year_string = _reader[0]["Date"][:6]  # assuming %Y%m%d
+            for row in _reader:
+                row["Date"] = self.mk_date(row["Date"], month_year_string)
         return _reader
 
     @staticmethod
