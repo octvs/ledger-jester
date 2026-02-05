@@ -6,7 +6,7 @@ from parsers import Parser
 
 
 class AmazonParser(Parser):
-    TYPE = "amazon"
+    TYPE = "amazonvisa"
 
     def read_file(self, fpath):
         df = pd.read_excel(fpath, header=10).dropna(how="all")
