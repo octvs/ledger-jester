@@ -29,6 +29,7 @@ def parser_factory(name):
     from .enpara import EnparaParser
     from .paypal import PaypalParser
     from .revolut import RevolutParser
+    from .vwbank import VWBankParser
 
     for klass in Parser.__subclasses__():
         if klass.TYPE == name:
