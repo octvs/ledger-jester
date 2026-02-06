@@ -19,7 +19,7 @@ class VWBankParser(Parser):
             ""
         )
         df = df.drop(["Nr.", "Soll (EUR)", "Haben (EUR)"], axis=1)
-        df["dt"] = pd.to_datetime(df["Buchungsdatum"], format="%d.%m.%Y")
+        df["dt"] = pd.to_datetime(df["Wertstellung"], format="%d.%m.%Y")
         return df
 
     def groups(self, df):
