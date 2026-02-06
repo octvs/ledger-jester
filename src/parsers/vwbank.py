@@ -22,7 +22,7 @@ class VWBankParser(Parser):
     def groups(self, df):
         return df.groupby(pd.Grouper(key="dt", freq="ME"))
 
-    def parse_groups(self, month):
-        dt = month["dt"].reset_index(drop=True)[0].strftime("%Y%m")
+    def write_group(self, group):
+        dt = group["dt"].reset_index(drop=True)[0].strftime("%Y%m")
         fname = f"{dt}-{self.TYPE}.csv"
-        month = month.drop("dt", axis=1).to_csv(fname, index=False)
+        group = group.drop("dt", axis=1).to_csv(fname, index=False)

@@ -15,7 +15,7 @@ class EnparaParser(Parser):
     TYPE = "enpara"
 
     def __init__(self):
-        subtype = None
+        self.subtype = None
 
     def deduce_account_type(self, fpath):
         acc_type = pd.read_excel(fpath, usecols=[1, 4]).iat[1, 1]
@@ -44,7 +44,7 @@ class EnparaParser(Parser):
     def groups(self, df):
         return df.groupby(pd.Grouper(key="Tarih", freq="ME"))
 
-    def parse_groups(self, group):
+    def write_group(self, group):
         dt = group["Tarih"].reset_index(drop=True)[0].strftime("%Y%m")
         fname = f"{dt}-enpara{self.subtype}.csv"
         group.to_csv(fname, index=False)

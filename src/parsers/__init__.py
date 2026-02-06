@@ -12,7 +12,7 @@ class Parser(ABC):
         pass
 
     @abstractmethod
-    def parse_groups(self, group):
+    def write_group(self, group):
         pass
 
     def groups(self, df):
@@ -21,7 +21,7 @@ class Parser(ABC):
     def parse(self, fpath):
         df = self.read_file(Path(fpath))
         for _, group in self.groups(df):
-            self.parse_groups(group)
+            self.write_group(group)
 
 
 def parser_factory(name):
