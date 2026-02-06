@@ -13,9 +13,12 @@ class VWBankParser(Parser):
             print(f"Unsupported file extension provided: {fpath.suffix}")
             exit()
         df = pd.read_csv(fpath, header=6, sep=";")
-        # Clean
-        df = df.dropna(how="all", axis=1)  # useless cols
-        df = df.drop("Nr.", axis=1)  # useless index
+        df = df.dropna(how="all", axis=1)
+        df["Soll (EUR)"] = "-" + df["Soll (EUR)"]
+        df["Umsatz"] = df["Haben (EUR)"].fillna("") + df["Soll (EUR)"].fillna(
+            ""
+        )
+        df = df.drop(["Nr.", "Soll (EUR)", "Haben (EUR)"], axis=1)
         df["dt"] = pd.to_datetime(df["Buchungsdatum"], format="%d.%m.%Y")
         return df
 
