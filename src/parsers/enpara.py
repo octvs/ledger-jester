@@ -16,9 +16,12 @@ class EnparaParser(Parser):
 
     def __init__(self):
         self.subtype = None
+        self.separator = "."
 
     def deduce_account_type(self, fpath):
-        acc_type = pd.read_excel(fpath, usecols=[1, 4]).iat[1, 1]
+        df_slice = pd.read_excel(fpath, usecols=[1, 2, 4])
+        acc_type = df_slice.iat[1, 2]
+        self.separator = df_slice.iat[10, 0][2]
         if acc_type == "Vadesiz TL":
             self.subtype = ""
         elif acc_type == "Birikim TL":
@@ -37,7 +40,7 @@ class EnparaParser(Parser):
             usecols=[1, 2, 5, 7, 8],
             skipfooter=4,
             parse_dates=[0],
-            date_format="%d.%m.%Y",
+            date_format=self.separator.join(["%d", "%m", "%Y"]),
         )
         return df1.rename(columns={df1.columns[0]: "Tarih"}).iloc[::-1]
 
