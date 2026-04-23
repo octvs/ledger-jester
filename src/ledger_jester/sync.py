@@ -21,19 +21,14 @@ class CsvSynchronizer:
             )
 
     def parse_file(self, path, accountname=None, unknownaccount=None):
-        with open(path) as f:
-            has_bom = f.read(3) == codecs.BOM_UTF8
-            if not (has_bom):
-                f.seek(0)
-            else:
-                f.seek(3)
-            dialect = csv.Sniffer().sniff(f.readline())
-            if not (has_bom):
-                f.seek(0)
-            else:
-                f.seek(3)
+        with open(path, mode="r", encoding="utf-8-sig") as f:
+            sample = f.read(2048)
+            f.seek(0)
+
+            dialect = csv.Sniffer().sniff(sample)
             dialect.skipinitialspace = True
             dialect.doublequote = True
+
             reader = csv.DictReader(f, dialect=dialect)
             converter = CsvConverter.make_converter(
                 set(reader.fieldnames),
@@ -44,13 +39,9 @@ class CsvSynchronizer:
                 payee_format=self.payee_format,
                 date_format=self.date_format,
             )
-            # Create a new reader in case the converter modified the dialect
-            if not (has_bom):
-                f.seek(0)
-            else:
-                f.seek(3)
-            reader = csv.DictReader(f, dialect=dialect)
 
+            f.seek(0)
+            reader = csv.DictReader(f, dialect=dialect)
             reader = converter.preprocess(reader)
 
             res = []
