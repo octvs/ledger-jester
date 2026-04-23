@@ -33,6 +33,7 @@ class CsvSynchronizer:
             else:
                 f.seek(3)
             dialect.skipinitialspace = True
+            dialect.doublequote = True
             reader = csv.DictReader(f, dialect=dialect)
             converter = CsvConverter.make_converter(
                 set(reader.fieldnames),
