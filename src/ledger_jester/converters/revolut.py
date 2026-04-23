@@ -34,7 +34,9 @@ class RevolutConverter(CsvConverter):
 
     def filter_payee_names(self, payee: str) -> str:
         _prefixes = re.compile(r"(From |To |Payment from )")
-        return re.sub(_prefixes, "", payee)
+        payee = re.sub(_prefixes, "", payee)
+        _interest_prefix = r"Net interest paid"
+        return re.sub(_interest_prefix + r" to .*", _interest_prefix, payee)
 
     def skip_row(self, row) -> bool:
         return (
