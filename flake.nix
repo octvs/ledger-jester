@@ -5,10 +5,15 @@
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     flake-parts.url = "github:hercules-ci/flake-parts";
     systems.url = "github:nix-systems/default";
+    treefmt-nix = {
+      url = "github:numtide/treefmt-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = inputs:
     inputs.flake-parts.lib.mkFlake {inherit inputs;} {
+      imports = [inputs.treefmt-nix.flakeModule];
       systems = import inputs.systems;
       perSystem = {pkgs, ...}: {
         packages.default = pkgs.python3Packages.buildPythonApplication rec {
@@ -23,6 +28,14 @@
             xlrd
           ];
           dontCheckRuntimeDeps = true;
+        };
+        treefmt = {
+          projectRootFile = "flake.nix";
+          programs.alejandra.enable = true;
+          programs.ruff-format = {
+            enable = true;
+            lineLength = 79;
+          };
         };
       };
     };
