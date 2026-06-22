@@ -4,6 +4,9 @@ from decimal import Decimal
 from ledger_jester.converter import Amount, CsvConverter, Posting, Transaction
 
 
+# TODO: Use Amazon punkte as well
+
+
 class AmazonVisaConverter(CsvConverter):
     FIELDSET = set(
         [
