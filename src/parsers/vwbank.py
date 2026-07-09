@@ -28,4 +28,4 @@ class VWBankParser(Parser):
     def write_group(self, group):
         dt = group["dt"].reset_index(drop=True)[0].strftime("%Y%m")
         fname = f"{dt}-{self.TYPE}.csv"
-        group = group.drop("dt", axis=1).to_csv(fname, index=False)
+        group.drop("dt", axis=1).to_csv(fname, index=False)
