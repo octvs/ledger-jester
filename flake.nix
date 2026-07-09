@@ -36,6 +36,10 @@
             enable = true;
             lineLength = 79;
           };
+          programs.ruff-check = {
+            enable = true;
+            extendSelect = ["I"];
+          };
         };
       };
     };
