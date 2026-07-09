@@ -21,7 +21,8 @@ class Parser(ABC):
     def parse(self, fpath):
         df = self.read_file(Path(fpath))
         for _, group in self.groups(df):
-            self.write_group(group)
+            if not group.empty:
+                self.write_group(group)
 
 
 def parser_factory(name):
