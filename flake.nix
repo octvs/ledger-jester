@@ -24,6 +24,7 @@
           build-system = with pkgs.python3.pkgs; [setuptools];
           dependencies = [pkgs.ledger] ++ optional-dependencies.parsers;
           optional-dependencies.parsers = with pkgs.python3.pkgs; [
+            lxml
             pandas
             xlrd
           ];

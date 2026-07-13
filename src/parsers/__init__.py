@@ -27,6 +27,7 @@ class Parser(ABC):
 
 def parser_factory(name):
     from .amazonvisa import AmazonParser
+    from .cepteteb import CeptetebParser
     from .comdirect import ComdirectParser
     from .enpara import EnparaParser
     from .paypal import PaypalParser

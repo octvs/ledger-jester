@@ -14,7 +14,7 @@ ledger-j = "ledger_jester.cli:run"
 ledger-p = "parsers.cli:run"
 
 [project.optional-dependencies]
-parsers = ["pandas", "xlrd"]
+parsers = ["lxml","pandas", "xlrd"]
 
 [tool.ruff]
 line-length = 79
