@@ -27,15 +27,17 @@ class CeptetebConverter(CsvConverter):
 
     def __init__(self, *args, **kwargs):
         super(CeptetebConverter, self).__init__(*args, **kwargs)
+        self.type_name = "cepteteb"
         self.cols = SimpleNamespace(**self.COLS)
         self.currency = "TRY"
         if self.name is None:
             self.name = "Assets:Bank:Teb:Checking"
         elif self.name.split(":")[-1] == "EUR":
             self.currency = "EUR"
+            self.type_name = self.type_name + ".eur"
 
     def get_csv_id(self, row):
-        return f"cepteteb.{Converter.clean_id(row['Dekont'])}"
+        return f"{self.type_name}.{Converter.clean_id(row['Dekont'])}"
 
     def convert(self, row):
         if self.skip_row(row):
