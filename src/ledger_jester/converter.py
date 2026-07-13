@@ -215,7 +215,7 @@ class CsvConverter(Converter):
         return reader
 
     def skip_row(self, row):
-        return row is not None
+        return row is None
 
     @staticmethod
     def make_converter(fieldset, dialect, name=None, **kwargs):
