@@ -31,14 +31,10 @@
         };
         treefmt = {
           projectRootFile = "flake.nix";
-          programs.alejandra.enable = true;
-          programs.ruff-format = {
-            enable = true;
-            lineLength = 79;
-          };
-          programs.ruff-check = {
-            enable = true;
-            extendSelect = ["I"];
+          programs = {
+            alejandra.enable = true;
+            ruff-format.enable = true;
+            ruff-check.enable = true;
           };
         };
       };

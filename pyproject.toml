@@ -15,3 +15,10 @@ ledger-p = "parsers.cli:run"
 
 [project.optional-dependencies]
 parsers = ["pandas", "xlrd"]
+
+[tool.ruff]
+line-length = 79
+
+[tool.ruff.lint]
+select = ["I"]
+ignore-init-module-imports = false
