@@ -1,4 +1,5 @@
 from .amazonvisa import AmazonVisaConverter
+from .comdirect import ComdirectConverter
 from .enpara import EnparaConverter
 from .enpara_kk import EnparaCCConverter
 from .paypal import PaypalConverter
