@@ -16,13 +16,16 @@
       imports = [inputs.treefmt-nix.flakeModule];
       systems = import inputs.systems;
       perSystem = {pkgs, ...}: {
-        packages.default = pkgs.python3Packages.buildPythonApplication {
+        packages.default = pkgs.python3Packages.buildPythonApplication rec {
           pname = "ledger-jester";
           version = "0-unstable";
           pyproject = true;
           src = ./.;
           build-system = with pkgs.python3.pkgs; [setuptools];
-          dependencies = [pkgs.ledger];
+          dependencies = [pkgs.ledger] ++ optional-dependencies.parsers;
+          optional-dependencies.parsers = with pkgs.python3.pkgs; [
+            pandas
+          ];
           dontCheckRuntimeDeps = true;
         };
         treefmt = {

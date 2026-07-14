@@ -9,5 +9,8 @@ description = "A stripped down fork of ledger-autosync."
 requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
 
+[project.optional-dependencies]
+parsers = ["pandas"]
+
 [project.scripts]
 ledger-j = "ledger_jester.cli:run"
