@@ -11,14 +11,9 @@ class CsvSynchronizer:
         self.date_format = date_format
 
     def is_row_synced(self, converter, row):
-        if self.lgr is None:
-            # User called with --no-ledger
-            # All transactions are considered "synced" in this case.
-            return False
-        else:
-            return self.lgr.check_transaction_by_id(
-                "csvid", converter.get_csv_id(row)
-            )
+        return self.lgr.check_transaction_by_id(
+            "csvid", converter.get_csv_id(row)
+        )
 
     def parse_file(self, path, accountname=None, unknownaccount=None):
         with open(path, mode="r", encoding="utf-8-sig") as f:
