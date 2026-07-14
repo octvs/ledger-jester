@@ -1,0 +1,10 @@
+[project]
+name = "ledger-jester"
+authors = [{ name = "octvs", email = "octvs@posteo.de" }]
+version = "0-unstable"
+dependencies = ["ledger"]
+description = "A stripped down fork of ledger-autosync."
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"

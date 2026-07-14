@@ -29,6 +29,7 @@
           programs = {
             alejandra.enable = true;
             deno.enable = true;
+            taplo.enable = true;
           };
         };
       };
