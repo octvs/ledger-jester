@@ -23,12 +23,21 @@
           src = ./.;
           build-system = with pkgs.python3.pkgs; [setuptools];
           dependencies = [pkgs.ledger];
+          dontCheckRuntimeDeps = true;
         };
         treefmt = {
           projectRootFile = "flake.nix";
           programs = {
             alejandra.enable = true;
             deno.enable = true;
+            ruff-check = {
+              enable = true;
+              extendSelect = ["I"];
+            };
+            ruff-format = {
+              enable = true;
+              lineLength = 79;
+            };
             taplo.enable = true;
           };
         };
