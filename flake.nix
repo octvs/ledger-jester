@@ -26,7 +26,10 @@
         };
         treefmt = {
           projectRootFile = "flake.nix";
-          programs.alejandra.enable = true;
+          programs = {
+            alejandra.enable = true;
+            deno.enable = true;
+          };
         };
       };
     };
