@@ -47,7 +47,7 @@ class AmazonVisaConverter(CsvConverter):
         currency = self.mk_currency(_curr)
         meta = {"csvid": self.get_csv_id(row)}
         payee = self.lgr.get_autosync_payee(row["Beschreibung"], self.name)
-        acct_dst = self.mk_dynamic_account(payee, exclude=self.name)
+        acct_dst = self.mk_dynamic_account(payee)
 
         posting_dst = Posting(
             account=acct_dst,

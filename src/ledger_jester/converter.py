@@ -150,6 +150,7 @@ class Converter(object):
         payee_format=None,
         date_format=None,
         infer_account=True,
+        name=None,
     ):
         self.lgr = ledger
         self.indent = indent
@@ -160,12 +161,13 @@ class Converter(object):
             self.currency = "$"
         self.date_format = date_format
         self.infer_account = infer_account
+        self.name = name
 
-    def mk_dynamic_account(self, payee, exclude):
+    def mk_dynamic_account(self, payee, exclude=[]):
         if self.lgr is None or not self.infer_account:
             return self.unknownaccount or "Expenses:Misc"
         else:
-            account = self.lgr.get_account_by_payee(payee, exclude)
+            account = self.lgr.get_account_by_payee(payee, self.name, exclude)
             if account is None:
                 return self.unknownaccount or "Expenses:Misc"
             else:
@@ -192,7 +194,6 @@ class CsvConverter(Converter):
     def __init__(
         self,
         dialect,
-        name=None,
         indent=4,
         ledger=None,
         unknownaccount=None,
@@ -208,7 +209,6 @@ class CsvConverter(Converter):
             date_format=date_format,
             infer_account=infer_account,
         )
-        self.name = name
         self.dialect = dialect
 
     def preprocess(self, reader: DictReader) -> DictReader | list:

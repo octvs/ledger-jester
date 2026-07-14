@@ -65,7 +65,7 @@ class RevolutConverter(CsvConverter):
         payee = self.lgr.get_autosync_payee(payee, self.name)
 
         acct_src = self.name
-        acct_dst = self.mk_dynamic_account(payee, exclude=acct_src)
+        acct_dst = self.mk_dynamic_account(payee)
 
         posting_dst = Posting(
             account=acct_dst,

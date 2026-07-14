@@ -22,9 +22,12 @@ class Ledger:
         else:
             return None
 
-    def get_account_by_payee(self, payee, exclude):
-        self.load_payees()
-        return self.filter_accounts(self.payees.get(payee, []), exclude)
+    def get_account_by_payee(self, payee, acct_src, exclude: list[str]):
+        """Excludes the source account by default"""
+        self.load_payees(acct_src)
+        return self.filter_accounts(
+            self.payees.get(payee, []), [acct_src] + exclude
+        )
 
     def add_payee(self, payee, account):
         if payee not in self.payees:
@@ -114,13 +117,13 @@ class Ledger:
         except StopIteration:
             return False
 
-    def load_payees(self):
+    def load_payees(self, acct):
         # TODO: Use only related payees? Like a graph
         # If two candidates equal occurence include both
         # Maybe if the spending same amunt use the same xact
         if self.payees is None:
             self.payees = {}
-            r = self.run(["show", "--actual"])
+            r = self.run(["--related", acct])  # Only related
             for line in r:
                 self.add_payee(line[2], line[3])
 

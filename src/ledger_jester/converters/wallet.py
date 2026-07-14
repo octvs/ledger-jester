@@ -19,8 +19,7 @@ class WalletConverter(CsvConverter):
         return "EUR" if currency == "" else currency
 
     def preprocess(self, reader: DictReader) -> list[dict]:
-        """
-        Preprocess logs to deduce date.
+        """Preprocess logs to deduce date.
 
         Since csv logs for wallet are intended to be written by hand this
         converter allows user to abstain year and month parts of a date if it
@@ -52,7 +51,7 @@ class WalletConverter(CsvConverter):
         bal = Decimal(row["Balance"]) if row["Balance"] != "" else None
         meta = {"csvid": self.get_csv_id(row)}
         payee = self.lgr.get_autosync_payee(row["Payee"], self.name)
-        acct_dst = self.mk_dynamic_account(payee, exclude=self.name)
+        acct_dst = self.mk_dynamic_account(payee)
 
         posting_dst = Posting(
             account=acct_dst,
