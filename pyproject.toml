@@ -11,6 +11,10 @@ build-backend = "setuptools.build_meta"
 
 [project.optional-dependencies]
 parsers = ["pandas"]
+test = ["pytest"]
 
 [project.scripts]
 ledger-j = "ledger_jester.cli:run"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

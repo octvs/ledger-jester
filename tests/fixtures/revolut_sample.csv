@@ -1,0 +1,7 @@
+Type,Product,Started Date,Completed Date,Description,Amount,Fee,Currency,State,Balance
+Transfer,Current,2024-01-05 10:00:00,2024-01-05 10:00:00,To Savings,-100.00,0.00,EUR,COMPLETED,900.00
+Interest,Deposit,2024-01-06 03:30:00,2024-01-06 03:30:00,"Net interest paid to ""Savings"" for Jan 6, 2024",1.50,0.30,EUR,COMPLETED,901.50
+Deposit,Current,2024-01-10 09:00:00,2024-01-10 09:00:01,Payment from Jane Smith,200.00,0.00,EUR,COMPLETED,1101.50
+Transfer,Current,2024-01-15 14:22:10,2024-01-15 14:22:11,Transfer to John Doe,-50.00,0.00,EUR,COMPLETED,1051.50
+Transfer,Current,2024-02-02 08:15:00,2024-02-02 08:15:00,Acme Insurance GmbH,-25.00,0.00,EUR,COMPLETED,1026.50
+Deposit,Current,2024-02-10 11:11:11,2024-02-10 11:11:12,Payment from Jane Smith,300.00,0.00,EUR,COMPLETED,1326.50

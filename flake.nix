@@ -26,6 +26,9 @@
           optional-dependencies.parsers = with pkgs.python3.pkgs; [
             pandas
           ];
+          nativeCheckInputs = with pkgs.python3.pkgs;
+            [pytestCheckHook]
+            ++ optional-dependencies.parsers;
           dontCheckRuntimeDeps = true;
         };
         treefmt = {
