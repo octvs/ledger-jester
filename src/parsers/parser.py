@@ -5,6 +5,8 @@ from pathlib import Path
 import pandas as pd
 from pandas.core.groupby import DataFrameGroupBy
 
+DOMAIN = "parsers"
+
 
 class Parser(ABC):
     """Abstract base class for all parsers.

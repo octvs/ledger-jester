@@ -1,6 +1,7 @@
 import argparse
 
-from parsers import PARSER_REGISTRY, get_parser
+from parsers.parser import DOMAIN
+from registry import REGISTRY, get
 
 
 def add_subparser(subparsers: argparse._SubParsersAction) -> None:
@@ -9,20 +10,20 @@ def add_subparser(subparsers: argparse._SubParsersAction) -> None:
     )
     parse_cmd.add_argument(
         "type",
-        choices=list(PARSER_REGISTRY.keys()),
+        choices=list(REGISTRY.get(DOMAIN, {}).keys()),
         help="Parser type to use",
     )
     parse_cmd.add_argument(
         "fpath", type=str, metavar="FILE", help="Export file to be parsed."
     )
-    parse_cmd.set_defaults(func=run)
+    parse_cmd.set_defaults(func=main)
 
 
-def run(args: argparse.Namespace) -> None:
+def main(args: argparse.Namespace) -> None:
     """Run the 'parse' subcommand.
 
     Args:
         args: Parsed CLI arguments containing 'fpath' and 'type'.
     """
-    parser = get_parser(args.type)
+    parser = get(DOMAIN, args.type)
     parser.parse(args.fpath)

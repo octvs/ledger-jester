@@ -2,11 +2,11 @@ from pathlib import Path
 
 import pandas as pd
 
-from parsers.parser import Parser
-from parsers.registry import register_parser
+from parsers.parser import DOMAIN, Parser
+from registry import register
 
 
-@register_parser
+@register(DOMAIN)
 class RevolutParser(Parser):
     TYPE = "revolut"
 

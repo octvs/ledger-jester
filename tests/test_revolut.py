@@ -5,8 +5,9 @@ from pathlib import Path
 import pandas as pd
 import pytest
 
-from parsers import get_parser
 from parsers.banks.revolut import RevolutParser
+from parsers.parser import DOMAIN
+from registry import get
 
 FIXTURE = Path(__file__).parent / "fixtures" / "revolut_sample.csv"
 
@@ -25,7 +26,7 @@ EXPECTED_COLUMNS = [
 
 
 def test_registry_returns_revolut_parser():
-    parser = get_parser("revolut")
+    parser = get(DOMAIN, "revolut")
     assert isinstance(parser, RevolutParser)
 
 
