@@ -14,7 +14,7 @@ parsers = ["pandas"]
 test = ["pytest"]
 
 [project.scripts]
-ledger-j = "ledger_jester.cli:run"
+ledger-j = "ledger_jester.__main__:run"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

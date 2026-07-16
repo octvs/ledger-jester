@@ -1,32 +1,15 @@
 import argparse
-import logging
-
-from ledger_jester.sync import add_subparser as add_sync_subparser
-from parsers.cli import add_subparser as add_parse_subcmd
 
 
-def build_argparser() -> argparse.ArgumentParser:
-    argparser = argparse.ArgumentParser(prog="ledger-j")
-    subparsers = argparser.add_subparsers(dest="command", required=True)
+def add_subparser(subparsers: argparse._SubParsersAction) -> None:
 
-    add_parse_subcmd(subparsers)
-    add_sync_subparser(subparsers)
 
-    argparser.add_argument(
-        "--verbose",
-        "-v",
-        dest="log_level",
-        action="append_const",
-        const=10,
+    sync_cmd = subparsers.add_parser("sync", help="Sync ledger data")
+    sync_cmd.add_argument(
+        "fpath", type=str, metavar="FILE", help="Csv file to be synced."
     )
-    return argparser
+    sync_cmd.set_defaults(func=main)
 
 
-def run():
-    argparser = build_argparser()
-    args = argparser.parse_args()
-    if args.log_level:
-        log_level = max(logging.DEBUG, logging.WARNING - sum(args.log_level))
-        logging.getLogger().setLevel(log_level)
-    logging.debug(f"Received args: {args}")
-    args.func(args)
+def main(args: argparse.Namespace) -> None:
+    print("Syncing ledger data...")

@@ -1,4 +1,37 @@
-from ledger_jester.cli import run
+import argparse
+import logging
+
+from ledger_jester.cli import add_subparser as add_sync_subcmd
+from parsers.cli import add_subparser as add_parse_subcmd
+
+
+def build_argparser() -> argparse.ArgumentParser:
+    argparser = argparse.ArgumentParser(prog="ledger-j")
+    subparsers = argparser.add_subparsers(dest="command", required=True)
+
+    add_parse_subcmd(subparsers)
+    add_sync_subcmd(subparsers)
+
+    argparser.add_argument(
+        "--verbose",
+        "-v",
+        dest="log_level",
+        action="append_const",
+        const=10,
+    )
+
+    return argparser
+
+
+def run() -> None:
+    argparser = build_argparser()
+    args = argparser.parse_args()
+    if args.log_level:
+        log_level = max(logging.DEBUG, logging.WARNING - sum(args.log_level))
+        logging.getLogger().setLevel(log_level)
+    logging.debug(f"Received args: {args}")
+    args.func(args)
+
 
 if __name__ == "__main__":
     run()
