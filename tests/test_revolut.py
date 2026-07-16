@@ -1,3 +1,4 @@
+"""Tests for RevolutParser."""
 # Written by AI.
 
 from pathlib import Path
@@ -26,12 +27,13 @@ EXPECTED_COLUMNS = [
 
 
 def test_registry_returns_revolut_parser():
+    """get(DOMAIN, "revolut") resolves to a RevolutParser instance."""
     parser = get(DOMAIN, "revolut")
     assert isinstance(parser, RevolutParser)
 
 
 def test_read_file_dt_matches_completed_date():
-    """dt must be a faithful parse of Completed Date, not just present."""
+    """Dt must be a faithful parse of Completed Date, not just present."""
     parser = RevolutParser()
     df = parser.read_file(FIXTURE)
 
@@ -51,7 +53,7 @@ def test_read_file_numeric_columns_are_numeric():
 
 
 def test_read_file_preserves_original_schema():
-    """dt is an internal-only column; original export schema must be untouched.
+    """Dt is an internal-only column; original export schema must be untouched.
 
     This is what allows downstream sync scripts to auto-detect export
     type by column signature.
@@ -63,6 +65,7 @@ def test_read_file_preserves_original_schema():
 
 
 def test_read_file_wrong_extension_raises(tmp_path):
+    """A non-.csv file extension raises ValueError."""
     bad_file = tmp_path / "export.txt"
     bad_file.write_text("not a csv")
 
@@ -72,6 +75,7 @@ def test_read_file_wrong_extension_raises(tmp_path):
 
 
 def test_read_file_missing_required_column_raises(tmp_path):
+    """A CSV missing 'Completed Date' raises KeyError."""
     bad_csv = tmp_path / "broken.csv"
     bad_csv.write_text("Type,Product,Amount\nTransfer,Current,10.00\n")
 
@@ -81,6 +85,7 @@ def test_read_file_missing_required_column_raises(tmp_path):
 
 
 def test_read_file_empty_file_raises(tmp_path):
+    """A completely empty file raises pandas' EmptyDataError."""
     empty_csv = tmp_path / "empty.csv"
     empty_csv.write_text("")
 
@@ -90,6 +95,7 @@ def test_read_file_empty_file_raises(tmp_path):
 
 
 def test_preprocess_groups_sorts_by_dt_and_product():
+    """Rows are sorted by dt first, then Product, ascending."""
     df = pd.DataFrame(
         {
             "dt": pd.to_datetime(["2024-01-02", "2024-01-01", "2024-01-01"]),
@@ -125,6 +131,7 @@ def test_preprocess_groups_stable_for_exact_ties():
 
 
 def test_parse_writes_one_file_per_month(tmp_path, monkeypatch):
+    """parse() writes exactly one CSV per distinct month in the input."""
     monkeypatch.chdir(tmp_path)
 
     parser = RevolutParser()
@@ -155,8 +162,11 @@ def test_parse_splits_rows_into_correct_month_file(tmp_path, monkeypatch):
 
 
 def test_parse_output_matches_original_schema(tmp_path, monkeypatch):
-    """Written CSVs must exactly match the original export's column set,
-    with no 'dt' leakage — this is the contract sync scripts rely on."""
+    """Assert written CSVs match the original export's column schema.
+
+    This is the contract sync scripts rely on for auto-detecting export
+    type by column signature, with no 'dt' leakage.
+    """
     monkeypatch.chdir(tmp_path)
 
     parser = RevolutParser()

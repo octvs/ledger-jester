@@ -38,7 +38,7 @@
             deno.enable = true;
             ruff-check = {
               enable = true;
-              extendSelect = ["I"];
+              extendSelect = ["I" "D"];
             };
             ruff-format = {
               enable = true;

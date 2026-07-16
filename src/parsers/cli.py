@@ -1,3 +1,5 @@
+"""'parse' subcommand: convert a bank export into monthly CSV chunks."""
+
 import argparse
 
 from parsers.parser import DOMAIN
@@ -5,6 +7,12 @@ from registry import REGISTRY, get
 
 
 def add_subparser(subparsers: argparse._SubParsersAction) -> None:
+    """Register the 'parse' subcommand.
+
+    Args:
+        subparsers: The subparsers action from the parent ArgumentParser.
+
+    """
     parse_cmd = subparsers.add_parser(
         "parse", help="Parse bank exports to use with ledger-jester."
     )
@@ -24,6 +32,7 @@ def main(args: argparse.Namespace) -> None:
 
     Args:
         args: Parsed CLI arguments containing 'fpath' and 'type'.
+
     """
     parser = get(DOMAIN, args.type)
     parser.parse(args.fpath)

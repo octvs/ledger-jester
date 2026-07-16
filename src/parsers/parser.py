@@ -1,3 +1,5 @@
+"""Abstract base class for bank export parsers."""
+
 import logging
 from abc import ABC, abstractmethod
 from pathlib import Path
@@ -14,6 +16,7 @@ class Parser(ABC):
     Attributes:
         TYPE (str | None): Unique string identifier for the parser.
             Must be set by subclasses.
+
     """
 
     TYPE: str | None = None
@@ -27,6 +30,7 @@ class Parser(ABC):
 
         Returns:
             pd.DataFrame: Parsed data with a 'dt' datetime column.
+
         """
         pass
 
@@ -38,6 +42,7 @@ class Parser(ABC):
 
         Returns:
             DataFrameGroupBy: Grouped by month end frequency.
+
         """
         return df.groupby(pd.Grouper(key="dt", freq="ME"))
 
@@ -51,6 +56,7 @@ class Parser(ABC):
         Args:
             group (pd.DataFrame): A slice of the full DataFrame,
                 corresponding to a single month.
+
         """
         dt = group["dt"].reset_index(drop=True)[0].strftime("%Y%m")
         fname = f"{dt}-{self.TYPE}.csv"
@@ -70,6 +76,7 @@ class Parser(ABC):
 
         Returns:
             pd.DataFrame: The preprocessed group.
+
         """
         return group
 
@@ -78,6 +85,7 @@ class Parser(ABC):
 
         Args:
             fpath (str): Path to the input file.
+
         """
         df = self.read_file(Path(fpath))
         logging.info(f"Read {fpath} from disk.")

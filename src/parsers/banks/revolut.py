@@ -1,3 +1,5 @@
+"""Parser for Revolut CSV exports."""
+
 from pathlib import Path
 
 import pandas as pd
@@ -8,6 +10,8 @@ from registry import register
 
 @register(DOMAIN)
 class RevolutParser(Parser):
+    """Parser for Revolut CSV exports."""
+
     TYPE = "revolut"
 
     def read_file(self, fpath: Path) -> pd.DataFrame:
@@ -21,6 +25,7 @@ class RevolutParser(Parser):
 
         Raises:
             ValueError: If the file is not a .csv file.
+
         """
         if fpath.suffix != ".csv":
             raise ValueError(f"Unsupported file extension: {fpath.suffix}")
@@ -31,4 +36,14 @@ class RevolutParser(Parser):
         return df
 
     def preprocess_groups(self, group: pd.DataFrame) -> pd.DataFrame:
+        """Sort a monthly group by completion date and product, stably.
+
+        Args:
+            group: A slice of the full DataFrame for a single month.
+
+        Returns:
+            pd.DataFrame: The group sorted by 'dt' then 'Product', with
+            ties broken by original row order.
+
+        """
         return group.sort_values(by=["dt", "Product"], kind="stable")
