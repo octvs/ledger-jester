@@ -1,6 +1,7 @@
 """Parser for Revolut CSV exports."""
 
 from pathlib import Path
+from typing import override
 
 import pandas as pd
 
@@ -15,34 +16,16 @@ class RevolutParser(Parser):
     TYPE = "revolut"
     FTYPE = "csv"
 
+    @override
     def read_file(self, fpath: Path) -> pd.DataFrame:
-        """Read a Revolut CSV export and return a DataFrame.
-
-        Args:
-            fpath (Path): Path to the input CSV file.
-
-        Returns:
-            pd.DataFrame: Parsed data with a 'dt' datetime column.
-
-        Raises:
-            ValueError: If the file is not a .csv file.
-
-        """
+        """Read a Revolut CSV export and return a DataFrame."""
         df = pd.read_csv(fpath)
         df["dt"] = pd.to_datetime(
             df["Completed Date"], format="%Y-%m-%d %H:%M:%S"
         )
         return df
 
+    @override
     def preprocess_groups(self, group: pd.DataFrame) -> pd.DataFrame:
-        """Sort a monthly group by completion date and product, stably.
-
-        Args:
-            group: A slice of the full DataFrame for a single month.
-
-        Returns:
-            pd.DataFrame: The group sorted by 'dt' then 'Product', with
-            ties broken by original row order.
-
-        """
+        """Sort a monthly group by completion date and product, stably."""
         return group.sort_values(by=["dt", "Product"], kind="stable")
