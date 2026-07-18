@@ -1,4 +1,4 @@
-"""'sync' subcommand: sync a parsed CSV export into the ledger file."""
+"""'sync' subcommand: sync a CSV export into the ledger file."""
 
 import argparse
 
