@@ -10,7 +10,7 @@ def add_subparser(subparsers: argparse._SubParsersAction) -> None:
         subparsers: The subparsers action from the parent ArgumentParser.
 
     """
-    sync_cmd = subparsers.add_parser("sync", help="Sync ledger data")
+    sync_cmd = subparsers.add_parser("sync", help="Sync ledger data.")
     sync_cmd.add_argument(
         "fpath", type=str, metavar="FILE", help="Csv file to be synced."
     )

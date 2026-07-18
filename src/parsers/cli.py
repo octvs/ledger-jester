@@ -19,7 +19,7 @@ def add_subparser(subparsers: argparse._SubParsersAction) -> None:
     parse_cmd.add_argument(
         "type",
         choices=list(REGISTRY.get(DOMAIN, {}).keys()),
-        help="Parser type to use",
+        help="Parser type to use.",
     )
     parse_cmd.add_argument(
         "fpath", type=str, metavar="FILE", help="Export file to be parsed."
