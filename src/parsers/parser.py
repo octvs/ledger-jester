@@ -16,10 +16,27 @@ class Parser(ABC):
     Attributes:
         TYPE (str | None): Unique string identifier for the parser.
             Must be set by subclasses.
+        FTYPE (str | None): File extension supported for the parser.
+            Must be set by subclasses.
 
     """
 
     TYPE: str | None = None
+    FTYPE: str | None = None
+
+    def assert_path(self, fpath: str) -> Path:
+        """Check whether the file provided is supported by the parser.
+
+        Args:
+            fpath (str): Path to the input file.
+
+        """
+        _fpath = Path(fpath)
+        if _fpath.suffix != f".{self.FTYPE}":
+            raise ValueError(f"Unsupported file extension: {_fpath.suffix}")
+        if not _fpath.exists():
+            raise FileNotFoundError(f"Path given does not exist: {fpath}")
+        return _fpath
 
     @abstractmethod
     def read_file(self, fpath: Path) -> pd.DataFrame:
@@ -87,8 +104,9 @@ class Parser(ABC):
             fpath (str): Path to the input file.
 
         """
-        df = self.read_file(Path(fpath))
-        logging.info(f"Read {fpath} from disk.")
+        _fpath = self.assert_path(fpath)
+        df = self.read_file(_fpath)
+        logging.info(f"Read {_fpath} from disk.")
         for _, group in self.groups(df):
             if not group.empty:
                 self.write_group(group)

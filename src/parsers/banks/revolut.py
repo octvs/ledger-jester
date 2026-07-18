@@ -13,6 +13,7 @@ class RevolutParser(Parser):
     """Parser for Revolut CSV exports."""
 
     TYPE = "revolut"
+    FTYPE = "csv"
 
     def read_file(self, fpath: Path) -> pd.DataFrame:
         """Read a Revolut CSV export and return a DataFrame.
@@ -27,8 +28,6 @@ class RevolutParser(Parser):
             ValueError: If the file is not a .csv file.
 
         """
-        if fpath.suffix != ".csv":
-            raise ValueError(f"Unsupported file extension: {fpath.suffix}")
         df = pd.read_csv(fpath)
         df["dt"] = pd.to_datetime(
             df["Completed Date"], format="%Y-%m-%d %H:%M:%S"

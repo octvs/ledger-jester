@@ -10,7 +10,7 @@ from parsers.banks.revolut import RevolutParser
 from parsers.parser import DOMAIN
 from registry import get
 
-FIXTURE = Path(__file__).parent / "fixtures" / "revolut_sample.csv"
+FIXTURE = str(Path(__file__).parent / "fixtures" / "revolut_sample.csv")
 
 EXPECTED_COLUMNS = [
     "Type",
@@ -35,7 +35,7 @@ def test_registry_returns_revolut_parser():
 def test_read_file_dt_matches_completed_date():
     """Dt must be a faithful parse of Completed Date, not just present."""
     parser = RevolutParser()
-    df = parser.read_file(FIXTURE)
+    df = parser.read_file(parser.assert_path(FIXTURE))
 
     expected = pd.to_datetime(df["Completed Date"], format="%Y-%m-%d %H:%M:%S")
     pd.testing.assert_series_equal(df["dt"], expected, check_names=False)
@@ -44,7 +44,7 @@ def test_read_file_dt_matches_completed_date():
 def test_read_file_numeric_columns_are_numeric():
     """Guards against decimal/thousands misparsing (as happened with CeptTEB)."""
     parser = RevolutParser()
-    df = parser.read_file(FIXTURE)
+    df = parser.read_file(parser.assert_path(FIXTURE))
 
     for col in ("Amount", "Fee", "Balance"):
         assert pd.api.types.is_float_dtype(df[col]), (
@@ -59,19 +59,28 @@ def test_read_file_preserves_original_schema():
     type by column signature.
     """
     parser = RevolutParser()
-    df = parser.read_file(FIXTURE)
+    df = parser.read_file(parser.assert_path(FIXTURE))
 
     assert [c for c in df.columns if c != "dt"] == EXPECTED_COLUMNS
 
 
-def test_read_file_wrong_extension_raises(tmp_path):
+def test_assert_path_wrong_extension_raises(tmp_path):
     """A non-.csv file extension raises ValueError."""
     bad_file = tmp_path / "export.txt"
     bad_file.write_text("not a csv")
 
     parser = RevolutParser()
     with pytest.raises(ValueError, match="Unsupported file extension"):
-        parser.read_file(bad_file)
+        parser.assert_path(bad_file)
+
+
+def test_assert_path_not_existing_file_raises(tmp_path):
+    """A non-existing file raises FileNotFoundError."""
+    bad_file = tmp_path / "random.csv"
+
+    parser = RevolutParser()
+    with pytest.raises(FileNotFoundError, match="Path given does not exist"):
+        parser.assert_path(bad_file)
 
 
 def test_read_file_missing_required_column_raises(tmp_path):
