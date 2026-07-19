@@ -15,21 +15,20 @@
     inputs.flake-parts.lib.mkFlake {inherit inputs;} {
       imports = [inputs.treefmt-nix.flakeModule];
       systems = import inputs.systems;
-      perSystem = {pkgs, ...}: {
-        packages.default = pkgs.python3Packages.buildPythonApplication rec {
+      perSystem = {pkgs, ...}: let
+        parserDeps = with pkgs.python3.pkgs; [pandas];
+      in {
+        packages.default = pkgs.python3Packages.buildPythonApplication {
           pname = "ledger-jester";
           version = "0-unstable";
           pyproject = true;
           src = ./.;
           build-system = with pkgs.python3.pkgs; [setuptools];
-          dependencies = [pkgs.ledger] ++ optional-dependencies.parsers;
-          optional-dependencies.parsers = with pkgs.python3.pkgs; [
-            pandas
-          ];
-          nativeCheckInputs = with pkgs.python3.pkgs;
-            [pytestCheckHook]
-            ++ optional-dependencies.parsers;
-          dontCheckRuntimeDeps = true;
+          optional-dependencies.parsers = parserDeps;
+          nativeCheckInputs = [pkgs.python3.pkgs.pytestCheckHook] ++ parserDeps;
+        };
+        devShells.default = pkgs.mkShell {
+          packages = [pkgs.ledger pkgs.python3.pkgs.pytest] ++ parserDeps;
         };
         treefmt = {
           projectRootFile = "flake.nix";

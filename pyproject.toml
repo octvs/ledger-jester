@@ -2,7 +2,6 @@
 name = "ledger-jester"
 authors = [{ name = "octvs", email = "octvs@posteo.de" }]
 version = "0.0.0"
-dependencies = ["ledger"]
 description = "A stripped down fork of ledger-autosync."
 
 [build-system]
