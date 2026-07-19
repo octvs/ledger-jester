@@ -28,7 +28,7 @@ EXPECTED_COLUMNS = [
 
 def test_registry_returns_revolut_parser():
     """get(DOMAIN, "revolut") resolves to a RevolutParser instance."""
-    parser = get(DOMAIN, "revolut")
+    parser = get(DOMAIN, "revolut")()
     assert isinstance(parser, RevolutParser)
 
 

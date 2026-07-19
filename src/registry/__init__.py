@@ -69,7 +69,7 @@ def register(domain: str):
     return decorator
 
 
-def get(domain: str, type_: str) -> T:
+def get(domain: str, type_: str) -> type:
     """Instantiate a registered class by domain and TYPE string.
 
     Args:
@@ -77,7 +77,7 @@ def get(domain: str, type_: str) -> T:
         type_: The registered TYPE identifier within that domain.
 
     Returns:
-        A new instance of the matching class.
+        The matching class to be initiated.
 
     Raises:
         KeyError: If domain or type_ isn't registered. Note that an
@@ -92,4 +92,4 @@ def get(domain: str, type_: str) -> T:
             f"No {domain!r} registered for type {type_!r}. "
             f"Available: {list(bucket.keys())}"
         )
-    return bucket[type_]()
+    return bucket[type_]

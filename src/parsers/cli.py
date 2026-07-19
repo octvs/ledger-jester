@@ -34,5 +34,5 @@ def main(args: argparse.Namespace) -> None:
         args: Parsed CLI arguments containing 'fpath' and 'type'.
 
     """
-    parser = get(DOMAIN, args.type)
+    parser = get(DOMAIN, args.type)()
     parser.parse(args.fpath)

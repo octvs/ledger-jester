@@ -4,12 +4,16 @@ import hashlib
 from datetime import datetime as dt
 from types import SimpleNamespace
 
+from ledger_jester.converter import DOMAIN
 from ledger_jester.ledger_wrapper import Amount, Ledger, Posting, Transaction
+from registry import register
 
 
+@register(DOMAIN)
 class RevolutConverter:
     """TODO."""
 
+    TYPE = "revolut"
     COLS = {
         "_": "Type",
         "acc_type": "Product",

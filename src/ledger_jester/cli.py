@@ -3,7 +3,7 @@
 import argparse
 import csv
 
-from converters.revolut import RevolutConverter
+from ledger_jester.converter import converter_factory
 
 
 def add_subparser(subparsers: argparse._SubParsersAction) -> None:
@@ -33,11 +33,11 @@ def main(args: argparse.Namespace) -> None:
         args: Parsed CLI arguments containing 'fpath'.
 
     """
-    sync = RevolutConverter(args.account)
     with open(args.fpath, mode="r", newline="") as f:
         content = csv.DictReader(f)
+        converter = converter_factory(content.fieldnames)(args.account)
         for row in content:
-            if not sync.is_row_synced(row):
-                xact = sync.convert(row)
+            if not converter.is_row_synced(row):
+                xact = converter.convert(row)
                 if xact:
                     print(xact)
