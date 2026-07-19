@@ -1,0 +1,11 @@
+"""Auto-discovery for bank-specific converter implementations.
+
+Every module placed in this package is automatically imported so that its
+@register decorator executes and the parser becomes available via REGISTRY.
+"""
+
+import importlib
+import pkgutil
+
+for _, module_name, _ in pkgutil.iter_modules(__path__):
+    importlib.import_module(f"{__name__}.{module_name}")
