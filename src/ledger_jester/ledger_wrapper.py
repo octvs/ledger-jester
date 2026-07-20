@@ -32,9 +32,9 @@ class Ledger:
             raise ValueError("You must defined LEDGER_FILE env var!")
         return Path(_ledger_fpath)
 
-    def match_metadata(self, key, val):
+    def run_query(self, query):
         """TODO."""
-        cmd = ["ledger", "-f", str(self.fpath), "csv", "meta", f"{key}={val}"]
+        cmd = ["ledger", "-f", str(self.fpath)] + query
         logging.debug(f"Running on sh: {' '.join(cmd)}")
         ret = run(cmd, capture_output=True, text=True)
         ret.check_returncode()

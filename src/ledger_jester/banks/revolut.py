@@ -1,6 +1,8 @@
 """TODO."""
 
+import csv
 import hashlib
+from collections import Counter, defaultdict
 from datetime import datetime as dt
 from types import SimpleNamespace
 
@@ -33,6 +35,21 @@ class RevolutConverter:
         self.ledger = Ledger()
         self.cols = SimpleNamespace(**self.COLS)
         self.acc_name = account
+        self._payees: defaultdict = defaultdict(list)
+        self.load_payees()
+
+    def load_payees(self) -> None:
+        """TODO."""
+        ret = self.ledger.run_query(["csv", "--related", self.acc_name])
+        for line in csv.reader(ret.splitlines()):
+            payee, dst_account = line[2:4]
+            self._payees[payee].append(dst_account)
+
+    def get_account_by_payee(self, payee: str) -> str:
+        """TODO."""
+        if payee in self._payees.keys():
+            return Counter(self._payees[payee]).most_common(1)[0][0]
+        return "Expenses:Misc"
 
     def get_identifier(self, row):
         """TODO."""
@@ -43,8 +60,9 @@ class RevolutConverter:
 
     def is_row_synced(self, row):
         """TODO."""
-        a = self.ledger.match_metadata("csvid", self.get_identifier(row))
-        return len(a) > 0
+        row_hash = self.get_identifier(row)
+        ret = self.ledger.run_query(["csv", "meta", f"csvid={row_hash}"])
+        return len(ret) > 0
 
     def convert(self, row):
         """TODO."""
@@ -66,7 +84,7 @@ class RevolutConverter:
         payee = row[self.cols.payee]
         meta = {"csvid": self.get_identifier(row)}
         acct_src = self.acc_name
-        acct_dst = "Expenses:Misc"  # TODO: dynamic_account
+        acct_dst = self.get_account_by_payee(payee)
 
         posting_src = Posting(
             account=acct_src,
