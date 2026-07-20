@@ -37,6 +37,7 @@ class RevolutConverter:
         self.acc_name: str = account
         self._payees: defaultdict = defaultdict(list)
         self.load_payees()
+        self._synced_ids = self.ledger.fetch_all_metadata("csvid")
 
     def load_payees(self) -> None:
         """TODO."""
@@ -60,9 +61,7 @@ class RevolutConverter:
 
     def is_row_synced(self, row: dict) -> bool:
         """TODO."""
-        row_hash = self.get_identifier(row)
-        ret = self.ledger.run_query(["csv", "meta", f"csvid={row_hash}"])
-        return len(ret) > 0
+        return self.get_identifier(row) in self._synced_ids
 
     def convert(self, row: dict) -> Transaction | None:
         """TODO."""

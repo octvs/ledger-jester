@@ -40,6 +40,17 @@ class Ledger:
         ret.check_returncode()
         return ret.stdout
 
+    def fetch_all_metadata(self, key: str) -> set:
+        """TODO."""
+        query = [
+            "csv",
+            "expr",
+            f"has_meta('{key}')",
+            "--format",
+            f"%(meta('{key}'))\\n",
+        ]
+        return set(self.run_query(query).splitlines())
+
 
 @dataclass
 class Amount:
