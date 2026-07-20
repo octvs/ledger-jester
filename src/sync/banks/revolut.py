@@ -55,7 +55,7 @@ class RevolutConverter:
         """TODO."""
         h = hashlib.md5()
         for key in sorted(row.keys()):
-            h.update(("%s=%s\n" % (key, row[key])).encode("utf-8"))
+            h.update((f"{key}={row[key]}\n").encode("utf-8"))
         return h.hexdigest()
 
     def is_row_synced(self, row: dict) -> bool:
