@@ -20,6 +20,7 @@ Typical usage, within a specific domain's own module:
     parser = get(DOMAIN, "revolut")  # -> RevolutParser()
 """
 
+from collections.abc import Callable
 from typing import TypeVar
 
 T = TypeVar("T")
@@ -28,7 +29,7 @@ REGISTRY: dict[str, dict[str, type]] = {}
 """The global registry: REGISTRY[domain][type_] -> class."""
 
 
-def register(domain: str):
+def register(domain: str) -> Callable:
     """Return a decorator that registers a class under a given domain.
 
     The returned decorator reads the class's TYPE attribute and stores

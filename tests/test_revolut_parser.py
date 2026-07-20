@@ -26,13 +26,13 @@ EXPECTED_COLUMNS = [
 ]
 
 
-def test_registry_returns_revolut_parser():
+def test_registry_returns_revolut_parser() -> None:
     """get(DOMAIN, "revolut") resolves to a RevolutParser instance."""
     parser = get(DOMAIN, "revolut")()
     assert isinstance(parser, RevolutParser)
 
 
-def test_read_file_dt_matches_completed_date():
+def test_read_file_dt_matches_completed_date() -> None:
     """Dt must be a faithful parse of Completed Date, not just present."""
     parser = RevolutParser()
     df = parser.read_file(parser.assert_path(FIXTURE))
@@ -41,7 +41,7 @@ def test_read_file_dt_matches_completed_date():
     pd.testing.assert_series_equal(df["dt"], expected, check_names=False)
 
 
-def test_read_file_numeric_columns_are_numeric():
+def test_read_file_numeric_columns_are_numeric() -> None:
     """Guards against decimal/thousands misparsing (as happened with CeptTEB)."""
     parser = RevolutParser()
     df = parser.read_file(parser.assert_path(FIXTURE))
@@ -52,7 +52,7 @@ def test_read_file_numeric_columns_are_numeric():
         )
 
 
-def test_read_file_preserves_original_schema():
+def test_read_file_preserves_original_schema() -> None:
     """Dt is an internal-only column; original export schema must be untouched.
 
     This is what allows downstream sync scripts to auto-detect export
@@ -64,28 +64,28 @@ def test_read_file_preserves_original_schema():
     assert [c for c in df.columns if c != "dt"] == EXPECTED_COLUMNS
 
 
-def test_assert_path_wrong_extension_raises(tmp_path):
+def test_assert_path_wrong_extension_raises(tmp_path: Path) -> None:
     """A non-.csv file extension raises ValueError."""
-    bad_file = tmp_path / "export.txt"
+    bad_file = tmp_path.joinpath("export.txt")
     bad_file.write_text("not a csv")
 
     parser = RevolutParser()
     with pytest.raises(ValueError, match="Unsupported file extension"):
-        parser.assert_path(bad_file)
+        parser.assert_path(str(bad_file))
 
 
-def test_assert_path_not_existing_file_raises(tmp_path):
+def test_assert_path_not_existing_file_raises(tmp_path: Path) -> None:
     """A non-existing file raises FileNotFoundError."""
-    bad_file = tmp_path / "random.csv"
+    bad_file = tmp_path.joinpath("random.csv")
 
     parser = RevolutParser()
     with pytest.raises(FileNotFoundError, match="Path given does not exist"):
-        parser.assert_path(bad_file)
+        parser.assert_path(str(bad_file))
 
 
-def test_read_file_missing_required_column_raises(tmp_path):
+def test_read_file_missing_required_column_raises(tmp_path: Path) -> None:
     """A CSV missing 'Completed Date' raises KeyError."""
-    bad_csv = tmp_path / "broken.csv"
+    bad_csv = tmp_path.joinpath("broken.csv")
     bad_csv.write_text("Type,Product,Amount\nTransfer,Current,10.00\n")
 
     parser = RevolutParser()
@@ -93,7 +93,7 @@ def test_read_file_missing_required_column_raises(tmp_path):
         parser.read_file(bad_csv)
 
 
-def test_read_file_empty_file_raises(tmp_path):
+def test_read_file_empty_file_raises(tmp_path: Path) -> None:
     """A completely empty file raises pandas' EmptyDataError."""
     empty_csv = tmp_path / "empty.csv"
     empty_csv.write_text("")
@@ -103,7 +103,7 @@ def test_read_file_empty_file_raises(tmp_path):
         parser.read_file(empty_csv)
 
 
-def test_preprocess_groups_sorts_by_dt_and_product():
+def test_preprocess_groups_sorts_by_dt_and_product() -> None:
     """Rows are sorted by dt first, then Product, ascending."""
     df = pd.DataFrame(
         {
@@ -122,7 +122,7 @@ def test_preprocess_groups_sorts_by_dt_and_product():
     assert result["Product"].tolist() == ["Current", "Deposit", "Current"]
 
 
-def test_preprocess_groups_stable_for_exact_ties():
+def test_preprocess_groups_stable_for_exact_ties() -> None:
     """Rows tied on both dt and Product must preserve original order."""
     df = pd.DataFrame(
         {
@@ -139,7 +139,9 @@ def test_preprocess_groups_stable_for_exact_ties():
     assert result["Amount"].tolist() == ["first", "second"]
 
 
-def test_parse_writes_one_file_per_month(tmp_path, monkeypatch):
+def test_parse_writes_one_file_per_month(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     """parse() writes exactly one CSV per distinct month in the input."""
     monkeypatch.chdir(tmp_path)
 
@@ -156,7 +158,9 @@ def test_parse_writes_one_file_per_month(tmp_path, monkeypatch):
     assert len(feb) == 2
 
 
-def test_parse_splits_rows_into_correct_month_file(tmp_path, monkeypatch):
+def test_parse_splits_rows_into_correct_month_file(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     """Row count alone doesn't catch a row landing in the wrong month."""
     monkeypatch.chdir(tmp_path)
 
@@ -170,7 +174,9 @@ def test_parse_splits_rows_into_correct_month_file(tmp_path, monkeypatch):
     assert set(feb["Completed Date"].str[:7]) == {"2024-02"}
 
 
-def test_parse_output_matches_original_schema(tmp_path, monkeypatch):
+def test_parse_output_matches_original_schema(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     """Assert written CSVs match the original export's column schema.
 
     This is the contract sync scripts rely on for auto-detecting export

@@ -30,11 +30,11 @@ class RevolutConverter:
     }
     DATE_FORMAT = "%Y-%m-%d %H:%M:%S"
 
-    def __init__(self, account):
+    def __init__(self, account: str) -> None:
         """TODO."""
-        self.ledger = Ledger()
-        self.cols = SimpleNamespace(**self.COLS)
-        self.acc_name = account
+        self.ledger: Ledger = Ledger()
+        self.cols: SimpleNamespace = SimpleNamespace(**self.COLS)
+        self.acc_name: str = account
         self._payees: defaultdict = defaultdict(list)
         self.load_payees()
 
@@ -51,20 +51,20 @@ class RevolutConverter:
             return Counter(self._payees[payee]).most_common(1)[0][0]
         return "Expenses:Misc"
 
-    def get_identifier(self, row):
+    def get_identifier(self, row: dict) -> str:
         """TODO."""
         h = hashlib.md5()
         for key in sorted(row.keys()):
             h.update(("%s=%s\n" % (key, row[key])).encode("utf-8"))
         return h.hexdigest()
 
-    def is_row_synced(self, row):
+    def is_row_synced(self, row: dict) -> bool:
         """TODO."""
         row_hash = self.get_identifier(row)
         ret = self.ledger.run_query(["csv", "meta", f"csvid={row_hash}"])
         return len(ret) > 0
 
-    def convert(self, row):
+    def convert(self, row: dict) -> Transaction:
         """TODO."""
         # TODO: generic skip_row():
         if (
