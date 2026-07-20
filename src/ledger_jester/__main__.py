@@ -7,8 +7,8 @@ dispatches to the selected subcommand's handler.
 import argparse
 import logging
 
-from ledger_jester.cli import add_subparser as add_sync_subcmd
 from parsers.cli import add_subparser as add_parse_subcmd
+from sync.cli import add_subparser as add_sync_subcmd
 
 
 def build_argparser() -> argparse.ArgumentParser:

@@ -3,7 +3,7 @@
 import argparse
 import csv
 
-from ledger_jester.converter import converter_factory
+from sync.converter import converter_factory
 
 
 def add_subparser(subparsers: argparse._SubParsersAction) -> None:
