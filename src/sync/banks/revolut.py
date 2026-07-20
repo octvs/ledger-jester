@@ -64,7 +64,7 @@ class RevolutConverter:
         ret = self.ledger.run_query(["csv", "meta", f"csvid={row_hash}"])
         return len(ret) > 0
 
-    def convert(self, row: dict) -> Transaction:
+    def convert(self, row: dict) -> Transaction | None:
         """TODO."""
         # TODO: generic skip_row():
         if (
