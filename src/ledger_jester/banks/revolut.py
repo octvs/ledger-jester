@@ -7,7 +7,7 @@ from datetime import datetime as dt
 from types import SimpleNamespace
 
 from ledger_jester.converter import DOMAIN
-from ledger_jester.ledger_wrapper import Amount, Ledger, Posting, Transaction
+from ledger_wrapper import Amount, Ledger, Posting, Transaction
 from registry import register
 
 
