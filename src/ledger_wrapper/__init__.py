@@ -75,23 +75,18 @@ class Amount:
 
     def __sub__(self, other: Amount) -> Amount:
         """TODO."""
-        if isinstance(other, Amount):
-            if self.currency != other.currency:
-                raise ValueError(
-                    "Subtraction of diff currencies is not supported."
-                )
-            return Amount(str(self._number - other._number), self.currency)
-        else:
-            raise NotImplementedError
+        assert isinstance(other, Amount)
+        if self.currency != other.currency:
+            raise ValueError("Can't operate on diff currencies.")
+        return Amount(str(self._number - other._number), self.currency)
 
     def __gt__(self, other: Amount | int) -> bool:
         """TODO."""
-        if isinstance(other, Amount):
-            return self._number > other._number
-        elif isinstance(other, int):
+        if isinstance(other, int):
             return self._number > other
         else:
-            raise NotImplementedError
+            assert isinstance(other, Amount)
+            return self._number > other._number
 
 
 @dataclass
