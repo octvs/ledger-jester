@@ -1,4 +1,4 @@
-"""Converter implementation for Revolut csv exports."""
+"""Converter implementation for Revolut csv statements."""
 
 import csv
 import hashlib
@@ -12,7 +12,7 @@ from sync import REGISTRY
 
 @REGISTRY.register
 class RevolutConverter:
-    """Converter implementation for Revolut csv exports."""
+    """Converter class for Revolut csv statements."""
 
     TYPE = "revolut"
     COLS = {
