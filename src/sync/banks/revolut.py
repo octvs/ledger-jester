@@ -36,10 +36,14 @@ class RevolutConverter(CsvConverter):
     def __init__(self, account: str) -> None:
         """Initialize converter with the target account name.
 
-        Additionally:
+        Additionally
         - Casts COLS class attribute to a SimpleNamespace for easier access.
         - Loads payees via self.load_payees.
         - Loads already synchronized xact ids via Ledger.fetch_all_metadata.
+
+        Args:
+            account: Target account name.
+
         """
         self.ledger: Ledger = Ledger()
         self.cols: SimpleNamespace = SimpleNamespace(**self.COLS)
@@ -60,7 +64,23 @@ class RevolutConverter(CsvConverter):
             self._payees[payee].append(dst_account)
 
     def get_account_by_payee(self, payee: str) -> str:
-        """Get the most probable payee name via frequency."""
+        """Get the most probable payee name via frequency.
+
+        Cache holds a dictionary mapping payee names to a list of account
+        names that have been on the same transaction with the source account.
+        If payee name found on this cache, the most frequent account name on
+        the list would be returned. If not a placeholder would be returned
+        instead.
+
+        Args:
+            payee: String consisting payee name that would be checked for
+            cached candidates.
+
+        Returns:
+            Most probable account name, or a placeholder in case of cache
+            miss.
+
+        """
         if payee in self._payees.keys():
             return Counter(self._payees[payee]).most_common(1)[0][0]
         return "Expenses:Misc"
@@ -70,6 +90,13 @@ class RevolutConverter(CsvConverter):
 
         Sorts dictionary before writing updating hash object with each element.
         Also encodes each dictionary element to utf-8 for consistency.
+
+        Args:
+            row: Dictionary object for the row being processed.
+
+        Returns:
+            A string consisting the hash calculated.
+
         """
         h = hashlib.md5()
         for key in sorted(row.keys()):
@@ -77,7 +104,15 @@ class RevolutConverter(CsvConverter):
         return h.hexdigest()
 
     def is_row_synced(self, row: dict) -> bool:
-        """Check whether the given row is in already synchronized id list."""
+        """Check whether the given row is in already synchronized id list.
+
+        Args:
+            row: Dictionary object for the row being processed.
+
+        Returns:
+            True if row is already synchronized, False otherwise.
+
+        """
         return self.get_identifier(row) in self._synced_ids
 
     @override
