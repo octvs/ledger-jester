@@ -5,13 +5,15 @@ import hashlib
 from collections import Counter, defaultdict
 from datetime import datetime as dt
 from types import SimpleNamespace
+from typing import override
 
 from ledger_wrapper import Amount, Ledger, Posting, Transaction
 from sync import REGISTRY
+from sync.converter import CsvConverter
 
 
 @REGISTRY.register
-class RevolutConverter:
+class RevolutConverter(CsvConverter):
     """Converter class for Revolut csv statements."""
 
     TYPE = "revolut"
@@ -78,17 +80,23 @@ class RevolutConverter:
         """Check whether the given row is in already synchronized id list."""
         return self.get_identifier(row) in self._synced_ids
 
-    def convert(self, row: dict) -> Transaction | None:
-        """Convert given Revolut export row to a Transaction object."""
-        # TODO: generic skip_row():
-        if (
-            row is None
-            or row[self.cols.acc_type]
-            != self._acc_map[self.acc_name.split(":")[-1]]
-            or (row["State"] in ["REVERTED", "PENDING"])
-        ):
-            return None
+    @override
+    def skip_row(self, row: dict) -> bool:
+        """Skip rows based on extended conditions for revolut.
 
+        Skips the current row if:
+        - "Product" column is not the target for the current invocation.
+        - "State" column is either "REVERTED" or "PENDING".
+        """
+        curr_type = self._acc_map[self.acc_name.split(":")[-1]]
+        return (
+            row[self.cols.acc_type] != curr_type
+            or row[self.cols.state] in ["REVERTED", "PENDING"]
+            or super().skip_row(row)
+        )
+
+    def convert(self, row: dict) -> Transaction:
+        """Convert given Revolut export row to a Transaction object."""
         date_start = dt.strptime(row[self.cols.date0], self.DATE_FORMAT)
         date_comp = dt.strptime(row[self.cols.date1], self.DATE_FORMAT)
         amount = row[self.cols.amount]
