@@ -1,4 +1,4 @@
-"""TODO."""
+"""Converter implementation for Revolut csv exports."""
 
 import csv
 import hashlib
@@ -12,7 +12,7 @@ from sync import REGISTRY
 
 @REGISTRY.register
 class RevolutConverter:
-    """TODO."""
+    """Converter implementation for Revolut csv exports."""
 
     TYPE = "revolut"
     COLS = {
@@ -30,7 +30,13 @@ class RevolutConverter:
     DATE_FORMAT = "%Y-%m-%d %H:%M:%S"
 
     def __init__(self, account: str) -> None:
-        """TODO."""
+        """Initialize converter with the target account name.
+
+        Additionally:
+        - Casts COLS class attribute to a SimpleNamespace for easier access.
+        - Loads payees via self.load_payees.
+        - Loads already synchronized xact ids via Ledger.fetch_all_metadata.
+        """
         self.ledger: Ledger = Ledger()
         self.cols: SimpleNamespace = SimpleNamespace(**self.COLS)
         self.acc_name: str = account
@@ -39,31 +45,39 @@ class RevolutConverter:
         self._synced_ids = self.ledger.fetch_all_metadata("csvid")
 
     def load_payees(self) -> None:
-        """TODO."""
+        """Load all related payee names to the target account.
+
+        Runs Ledger.run_query, to create a subprocess that runs: `ledger csv
+        --related <acc_name>`.
+        """
         ret = self.ledger.run_query(["csv", "--related", self.acc_name])
         for line in csv.reader(ret.splitlines()):
             payee, dst_account = line[2:4]
             self._payees[payee].append(dst_account)
 
     def get_account_by_payee(self, payee: str) -> str:
-        """TODO."""
+        """Get the most probable payee name via frequency."""
         if payee in self._payees.keys():
             return Counter(self._payees[payee]).most_common(1)[0][0]
         return "Expenses:Misc"
 
     def get_identifier(self, row: dict) -> str:
-        """TODO."""
+        """Calculate the md5 hash sum of the given row.
+
+        Sorts dictionary before writing updating hash object with each element.
+        Also encodes each dictionary element to utf-8 for consistency.
+        """
         h = hashlib.md5()
         for key in sorted(row.keys()):
             h.update((f"{key}={row[key]}\n").encode("utf-8"))
         return h.hexdigest()
 
     def is_row_synced(self, row: dict) -> bool:
-        """TODO."""
+        """Check whether the given row is in already synchronized id list."""
         return self.get_identifier(row) in self._synced_ids
 
     def convert(self, row: dict) -> Transaction | None:
-        """TODO."""
+        """Convert given Revolut export row to a Transaction object."""
         # TODO: generic skip_row():
         if (
             row is None

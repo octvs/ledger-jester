@@ -1,4 +1,4 @@
-"""TODO."""
+"""Sync module with its own registry for converter implementations."""
 
 from typing import Sequence, Type
 
