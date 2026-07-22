@@ -10,7 +10,7 @@ from parsers import REGISTRY, Parser
 
 @REGISTRY.register
 class RevolutParser(Parser):
-    """Parser for Revolut CSV exports."""
+    """Parser class for Revolut CSV exports."""
 
     TYPE = "revolut"
     FTYPE = "csv"
