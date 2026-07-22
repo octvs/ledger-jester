@@ -2,8 +2,7 @@
 
 import argparse
 
-from parsers.parser import DOMAIN
-from registry import REGISTRY, get
+from parsers import REGISTRY
 
 
 def add_subparser(subparsers: argparse._SubParsersAction) -> None:
@@ -18,7 +17,7 @@ def add_subparser(subparsers: argparse._SubParsersAction) -> None:
     )
     parse_cmd.add_argument(
         "type",
-        choices=list(REGISTRY.get(DOMAIN, {}).keys()),
+        choices=list(REGISTRY._bucket.keys()),
         help="Parser type to use.",
     )
     parse_cmd.add_argument(
@@ -34,5 +33,5 @@ def main(args: argparse.Namespace) -> None:
         args: Parsed CLI arguments containing 'fpath' and 'type'.
 
     """
-    parser = get(DOMAIN, args.type)()
+    parser = REGISTRY.get(args.type)()
     parser.parse(args.fpath)

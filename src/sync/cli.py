@@ -3,7 +3,7 @@
 import argparse
 import csv
 
-from sync.converter import converter_factory
+from sync import REGISTRY
 
 
 def add_subparser(subparsers: argparse._SubParsersAction) -> None:
@@ -35,7 +35,9 @@ def main(args: argparse.Namespace) -> None:
     """
     with open(args.fpath, mode="r", newline="") as f:
         content = csv.DictReader(f)
-        converter = converter_factory(content.fieldnames)(args.account)
+        if not content.fieldnames:
+            raise ValueError(f"Given file is empty: {args.fpath}")
+        converter = REGISTRY.get(content.fieldnames)(args.account)
         for row in content:
             if not converter.is_row_synced(row):
                 xact = converter.convert(row)

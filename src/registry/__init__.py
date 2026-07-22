@@ -1,96 +1,64 @@
 """Generic name -> class registry for building extensible plugin systems.
 
-This module provides a single global REGISTRY, organized as a dict of
-independent namespaces ("domains"). Each domain (e.g. "parsers", "sync")
-maps TYPE strings to classes, allowing unrelated plugin systems to share
-the same registration mechanism without risking name collisions between
-domains.
+This module provides a Registry class. Each submodule (e.g. "parsers", "sync")
+can extend this to create its own registry.
 
-Typical usage, within a specific domain's own module:
+Typical usage:
 
-    from registry import register, get
+foo/__init__.py
 
-    DOMAIN = "parsers"
+    from registry import Registry
 
-    @register(DOMAIN)
-    class RevolutParser(Parser):
-        TYPE = "revolut"
+    class ModuleRegistry(Registry):
+        TYPE = "my-module"
+
+    REGISTRY = ModuleRegistry()
+
+foo/sub_module/bar.py
+
+    from foo import REGISTRY
+
+    @REGISTRY.register
+    class Bar:
+        TYPE = "bar"
         ...
 
-    parser = get(DOMAIN, "revolut")  # -> RevolutParser()
+baz.py
+
+    from foo import REGISTRY
+
+    bar_class = REGISTRY.get("bar")  # -> Bar()
 """
 
-from collections.abc import Callable
-from typing import TypeVar
+from typing import Generic, Type, TypeVar
 
 T = TypeVar("T")
 
-REGISTRY: dict[str, dict[str, type]] = {}
-"""The global registry: REGISTRY[domain][type_] -> class."""
 
+class Registry(Generic[T]):
+    """Base Registry class, maps string TYPE keys directly to classes."""
 
-def register(domain: str) -> Callable:
-    """Return a decorator that registers a class under a given domain.
+    def __init__(self) -> None:
+        """Initialize registry with empty dictionary."""
+        self._bucket: dict[str, Type[T]] = {}
 
-    The returned decorator reads the class's TYPE attribute and stores
-    the class in REGISTRY[domain][TYPE]. The class itself is returned
-    unmodified, so decorating a class with this has no effect on its
-    runtime behavior beyond the registration side effect.
-
-    Args:
-        domain: Namespace to register under (e.g. "parsers", "sync").
-            Each domain is independent, so the same TYPE string may be
-            reused across different domains without conflict.
-
-    Returns:
-        A decorator function that, when applied to a class, registers
-        it and returns it unchanged.
-
-    Raises:
-        ValueError: If the decorated class has no TYPE attribute set,
-            or if that TYPE is already registered within this domain.
-
-    """
-    bucket = REGISTRY.setdefault(domain, {})
-
-    def decorator(cls: type[T]) -> type[T]:
+    def register(self, cls: Type[T]) -> Type[T]:
+        """Register a class using its `TYPE` attribute."""
         type_ = getattr(cls, "TYPE", None)
-        if type_ is None:
+        if not type_:
             raise ValueError(
-                f"{cls.__name__} must set a TYPE before registering under {domain!r}"
+                f"Class '{cls.__name__}' must define a 'TYPE' attribute."
             )
-        if type_ in bucket:
-            raise ValueError(
-                f"{domain!r} TYPE {type_!r} is already registered "
-                f"to {bucket[type_].__name__}"
-            )
-        bucket[type_] = cls
+        if type_ in self._bucket:
+            raise ValueError(f"TYPE {type_!r} is already registered.")
+        self._bucket[type_] = cls
         return cls
 
-    return decorator
-
-
-def get(domain: str, type_: str) -> type:
-    """Instantiate a registered class by domain and TYPE string.
-
-    Args:
-        domain: The namespace to look up (e.g. "parsers", "sync").
-        type_: The registered TYPE identifier within that domain.
-
-    Returns:
-        The matching class to be initiated.
-
-    Raises:
-        KeyError: If domain or type_ isn't registered. Note that an
-            unknown domain and an unknown type_ within a known domain
-            both raise the same error; the message's "Available" list
-            will be empty in the former case.
-
-    """
-    bucket = REGISTRY.get(domain, {})
-    if type_ not in bucket:
-        raise KeyError(
-            f"No {domain!r} registered for type {type_!r}. "
-            f"Available: {list(bucket.keys())}"
-        )
-    return bucket[type_]
+    def get(self, key: str) -> Type[T]:
+        """Retrieve class by string key."""
+        if key not in self._bucket:
+            raise KeyError(
+                f"No plugin registered for TYPE {key!r}. "
+                f"Available: {list(self._bucket.keys())}"
+            )
+        return self._bucket[key]

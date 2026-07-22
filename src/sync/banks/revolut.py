@@ -7,11 +7,10 @@ from datetime import datetime as dt
 from types import SimpleNamespace
 
 from ledger_wrapper import Amount, Ledger, Posting, Transaction
-from registry import register
-from sync.converter import DOMAIN
+from sync import REGISTRY
 
 
-@register(DOMAIN)
+@REGISTRY.register
 class RevolutConverter:
     """TODO."""
 

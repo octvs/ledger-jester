@@ -5,11 +5,10 @@ from typing import override
 
 import pandas as pd
 
-from parsers.parser import DOMAIN, Parser
-from registry import register
+from parsers import REGISTRY, Parser
 
 
-@register(DOMAIN)
+@REGISTRY.register
 class RevolutParser(Parser):
     """Parser for Revolut CSV exports."""
 
