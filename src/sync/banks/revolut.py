@@ -29,6 +29,8 @@ class RevolutConverter:
     }
     DATE_FORMAT = "%Y-%m-%d %H:%M:%S"
 
+    _acc_map = {"Checking": "Current", "Savings": "Deposit"}
+
     def __init__(self, account: str) -> None:
         """Initialize converter with the target account name.
 
@@ -81,7 +83,8 @@ class RevolutConverter:
         # TODO: generic skip_row():
         if (
             row is None
-            or row["Product"] == "Deposit"
+            or row[self.cols.acc_type]
+            != self._acc_map[self.acc_name.split(":")[-1]]
             or (row["State"] in ["REVERTED", "PENDING"])
         ):
             return None
