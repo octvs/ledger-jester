@@ -65,7 +65,6 @@ class AmazonVisaConverter(CsvConverter):
         return Transaction(
             date=date,
             cleared=True,
-            date_format="%Y/%m/%d",
             payee=payee,
             postings=postings,
         )
