@@ -3,6 +3,7 @@
 from typing import Sequence, Type
 
 from registry import Registry, T
+from sync.converter import CsvConverter
 
 
 class ConverterRegistry(Registry):
@@ -33,3 +34,5 @@ REGISTRY = ConverterRegistry()
 
 # Must run last to initialize after the rest
 from sync import banks  # noqa: F401, E402
+
+__all__ = ["CsvConverter", "REGISTRY"]

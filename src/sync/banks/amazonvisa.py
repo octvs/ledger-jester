@@ -4,8 +4,7 @@ from datetime import datetime as dt
 from typing import override
 
 from ledger_wrapper import Amount, Posting, Transaction
-from sync import REGISTRY
-from sync.converter import CsvConverter
+from sync import REGISTRY, CsvConverter
 
 
 @REGISTRY.register
