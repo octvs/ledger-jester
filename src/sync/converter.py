@@ -20,30 +20,30 @@ class CsvConverter(ABC):
 
         Additionally
         - Casts COLS class attribute to a SimpleNamespace for easier access.
-        - Loads payees via self.load_payees.
+        - Loads payees via self.fetch_related_accounts.
         - Loads already synchronized xact ids via Ledger.fetch_all_metadata.
 
         Args:
             account: Target account name.
 
         """
+        self.acc_name: str = account
         self.ledger: Ledger = Ledger()
         self.cols: SimpleNamespace = SimpleNamespace(**self.COLS)
-        self.acc_name: str = account
-        self._payees: defaultdict = defaultdict(list)
-        self.load_payees()
-        self._synced_ids = self.ledger.fetch_all_metadata("csvid")
+        self._related_payees: dict = self.fetch_related_accounts()
+        self._synced_ids: set = self.ledger.fetch_all_metadata("csvid")
 
-    def load_payees(self) -> None:
-        """Load all related payee names to the target account.
+    def fetch_related_accounts(self) -> dict:
+        """Load all payee/account pairs related to the target account.
 
         Runs Ledger.run_query, to create a subprocess that runs: `ledger csv
         --related <acc_name>`.
         """
+        _pairs = defaultdict(list)
         ret = self.ledger.run_query(["csv", "--related", self.acc_name])
         for line in csv.reader(ret.splitlines()):
-            payee, dst_account = line[2:4]
-            self._payees[payee].append(dst_account)
+            _pairs[line[2]].append(line[3])
+        return _pairs
 
     def get_account_by_payee(self, payee: str) -> str:
         """Get the most probable payee name via frequency.
@@ -63,8 +63,8 @@ class CsvConverter(ABC):
             miss.
 
         """
-        if payee in self._payees.keys():
-            return Counter(self._payees[payee]).most_common(1)[0][0]
+        if payee in self._related_payees.keys():
+            return Counter(self._related_payees[payee]).most_common(1)[0][0]
         return "Expenses:Misc"
 
     def get_identifier(self, row: dict) -> str:
