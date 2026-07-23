@@ -14,7 +14,13 @@ from sync.converter import CsvConverter
 
 @REGISTRY.register
 class RevolutConverter(CsvConverter):
-    """Converter class for Revolut csv statements."""
+    """Converter class for Revolut csv statements.
+
+    The converter guesses which account to use from the export (Deposit or
+    Current) based on the account name provided on the initialization. If given
+    account name ends with "Savings" it uses rows for "Deposit", if "Checking"
+    "Current".
+    """
 
     TYPE = "revolut"
     COLS = {
@@ -30,8 +36,7 @@ class RevolutConverter(CsvConverter):
         "balance": "Balance",
     }
     DATE_FORMAT = "%Y-%m-%d %H:%M:%S"
-
-    _acc_map = {"Checking": "Current", "Savings": "Deposit"}
+    _ACC_MAP = {"Checking": "Current", "Savings": "Deposit"}
 
     def __init__(self, account: str) -> None:
         """Initialize converter with the target account name.
@@ -123,7 +128,7 @@ class RevolutConverter(CsvConverter):
         - "Product" column is not the target for the current invocation.
         - "State" column is either "REVERTED" or "PENDING".
         """
-        curr_type = self._acc_map[self.acc_name.split(":")[-1]]
+        curr_type = self._ACC_MAP[self.acc_name.split(":")[-1]]
         return (
             row[self.cols.acc_type] != curr_type
             or row[self.cols.state] in ["REVERTED", "PENDING"]
