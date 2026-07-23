@@ -97,10 +97,9 @@ class Amount:
 
     def __str__(self) -> str:
         """Return string representation of an amount in ledger syntax."""
-        # If currency is symbol write before, else after
-        if len(self.currency) == 1:
-            return self.currency + str(self._number)
-        return str(self._number) + " " + self.currency
+        if len(self.currency) == 1:  # If symbol write before, else after
+            return f"{self.currency} + {self._number:.2f}"
+        return f"{self._number:.2f} {self.currency}"
 
     def __sub__(self, other: Amount) -> Amount:
         """Substract an Amount instance from another.
@@ -149,9 +148,8 @@ class Posting:
 
     def __str__(self) -> str:
         """Return string representation of a posting in ledger syntax."""
-        retval = (
-            f"{self.account:<{COL_WIDTH - len(str(self.amount))}}{self.amount}"
-        )
+        _width = COL_WIDTH - INDENT - len(str(self.amount))
+        retval = f"{self.account:<{_width}}{self.amount}"
         retval += f" = {self.asserted}" if self.asserted else ""
         for _key in sorted(self.metadata.keys()):
             retval += f"\n; {_key}: {self.metadata[_key]}"
