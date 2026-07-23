@@ -13,6 +13,7 @@ class CsvConverter(ABC):
     """Generic converter class for csv statements."""
 
     COLS = {}
+    CURRENCY_CODES = {"$": "USD", "£": "GBP", "€": "EUR"}
 
     def __init__(self, account: str) -> None:
         """Initialize converter with the target account name.
@@ -120,3 +121,33 @@ class CsvConverter(ABC):
 
         """
         pass
+
+    def make_currency(self, currency: str) -> str:
+        """Convert if currency symbol to currency code, else return as is.
+
+        Args:
+            currency: String to be converted.
+
+        Returns:
+            Converted string.
+
+        """
+        if currency in self.CURRENCY_CODES.keys():
+            return self.CURRENCY_CODES[currency]
+        return currency
+
+    @staticmethod
+    def format_eu_number_to_us(numeric_str: str) -> str:
+        """Convert a European-formatted numeric string to US standard format.
+
+        Replaces thousands separators (dots) with nothing and the decimal
+        separator (comma) with a dot (e.g., '1.234,56' -> '1234.56').
+
+        Args:
+            numeric_str: The European number string to reformat.
+
+        Returns:
+            The reformatted numeric string.
+
+        """
+        return numeric_str.replace(".", "").replace(",", ".")
