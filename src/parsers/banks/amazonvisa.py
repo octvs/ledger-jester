@@ -9,7 +9,7 @@ from parsers import REGISTRY, Parser
 
 
 @REGISTRY.register
-class AmazonParser(Parser):
+class AmazonVisaParser(Parser):
     """Parser class for Amazon Visa Excel (.xls) exports."""
 
     TYPE = "amazonvisa"

@@ -1,2 +1,2 @@
 """Tests for RevolutConverter."""
-# TODO: Test functionalities of converts/revolut.py
+# TODO: Test functionalities of sync/banks/revolut.py
