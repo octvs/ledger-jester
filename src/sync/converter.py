@@ -1,8 +1,14 @@
 """Base converter implementation for csv statements."""
 
+from abc import ABC, abstractmethod
 
-class CsvConverter:
+from ledger_wrapper import Transaction
+
+
+class CsvConverter(ABC):
     """Generic converter class for csv statements."""
+
+    COLS = {}
 
     def skip_row(self, row: dict) -> bool:
         """Skip processing row if it is empty.
@@ -15,3 +21,16 @@ class CsvConverter:
 
         """
         return row is None
+
+    @abstractmethod
+    def convert(self, row: dict) -> Transaction:
+        """Convert given export row to a Transaction object.
+
+        Args:
+            row: Dictionary of the row to be processed.
+
+        Returns:
+            Resulting Transaction instance.
+
+        """
+        pass

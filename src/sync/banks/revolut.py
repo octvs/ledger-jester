@@ -130,6 +130,7 @@ class RevolutConverter(CsvConverter):
             or super().skip_row(row)
         )
 
+    @override
     def convert(self, row: dict) -> Transaction:
         """Convert given Revolut export row to a Transaction object."""
         date_start = dt.strptime(row[self.cols.date0], self.DATE_FORMAT)
