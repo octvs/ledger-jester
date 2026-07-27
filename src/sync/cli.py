@@ -39,6 +39,7 @@ def main(args: argparse.Namespace) -> None:
             raise ValueError(f"Given file is empty: {args.fpath}")
         converter = REGISTRY.get(content.fieldnames)(args.account)
         for row in content:
+            row = converter.ROW_TYPE.from_dict(row)
             if not (converter.skip_row(row) or converter.is_row_synced(row)):
                 xact = converter.convert(row)
                 if xact:

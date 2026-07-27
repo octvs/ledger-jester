@@ -3,7 +3,7 @@
 from typing import Sequence, Type
 
 from registry import Registry, T
-from sync.converter import CsvConverter
+from sync.converter import CsvConverter, CsvRow
 
 
 class ConverterRegistry(Registry):
@@ -22,7 +22,7 @@ class ConverterRegistry(Registry):
             return super().get(key)
 
         for _type, klass in self._bucket.items():
-            if set(klass.COLS.values()) == set(key):
+            if set(klass.ROW_TYPE.get_headers()) <= set(key):
                 return klass
 
         raise NotImplementedError(
@@ -35,4 +35,4 @@ REGISTRY = ConverterRegistry()
 # Must run last to initialize after the rest
 from sync import banks  # noqa: F401, E402
 
-__all__ = ["CsvConverter", "REGISTRY"]
+__all__ = ["CsvConverter", "CsvRow", "REGISTRY"]

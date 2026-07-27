@@ -1,14 +1,34 @@
 """Converter implementation for Amazon Visa csv statements."""
 
+from dataclasses import dataclass, field
 from datetime import datetime as dt
 from typing import override
 
 from ledger_wrapper import Amount, Posting, Transaction
-from sync import REGISTRY, CsvConverter
+from sync import REGISTRY, CsvConverter, CsvRow
+
+
+@dataclass
+class AmazonVisaRow(CsvRow):
+    """Dataclass representing a transaction row from Amazon Visa exports."""
+
+    date: str = field(metadata={"col": "Datum"})
+    payee: str = field(metadata={"col": "Beschreibung"})
+    raw_amount: str = field(metadata={"col": "Betrag"})
+
+    # Processed attributes
+    amount: str = field(init=False)
+    currency: str = field(init=False)
+
+    def __post_init__(self) -> None:
+        """Parse raw amount string into separate amount and currency."""
+        _amount, _currency = self.raw_amount.split()
+        self.amount = self.format_eu_number_to_us(_amount)
+        self.currency = self.make_currency(_currency)
 
 
 @REGISTRY.register
-class AmazonVisaConverter(CsvConverter):
+class AmazonVisaConverter(CsvConverter[AmazonVisaRow]):
     """Converter class for Amazon Visa csv statements.
 
     Currently disregards "Punkte" column which holds amazon points for the
@@ -16,55 +36,29 @@ class AmazonVisaConverter(CsvConverter):
     """
 
     TYPE = "amazonvisa"
-    COLS = {
-        "date0": "Datum",
-        "_": "Zeit",
-        "_1": "Karte",
-        "payee": "Beschreibung",
-        "_2": "Umsatzkategorie",
-        "_3": "Unterkategorie",
-        "amount": "Betrag",
-        "_4": "Punkte",
-    }
+    ROW_TYPE = AmazonVisaRow
     DATE_FORMAT = "%d.%m.%Y "
 
     @override
-    def get_identifier(self, row: dict) -> str:
-        """Exclude 'Punkte' before passing row to parent class for hashing.
-
-        Aforementioned column gets updated couple of days after the
-        transaction. This triggers another sync for the same transaction, which
-        we avoid by dropping it before hash calculation.
-        """
-        clean_row = {k: v for k, v in row.items() if k != "Punkte"}
-        return super().get_identifier(clean_row)
-
-    @override
-    def convert(self, row: dict) -> Transaction:
+    def convert(self, row: AmazonVisaRow) -> Transaction:
         """Convert given Amazon Visa export row to a Transaction object."""
-        date = dt.strptime(row[self.cols.date0], self.DATE_FORMAT)
-        _amount, _curr = row["Betrag"].split()
-        amount = self.format_eu_number_to_us(_amount)
-        currency = self.make_currency(_curr)
-        payee = row[self.cols.payee]
-        meta = {"csvid": self.get_identifier(row)}
-        acct_src = self.acc_name
-        acct_dst = self.get_account_by_payee(payee)
+        date = dt.strptime(row.date, self.DATE_FORMAT)
+        acct_dst = self.get_account_by_payee(row.payee)
 
         posting_src = Posting(
-            account=acct_src,
-            amount=Amount(amount, currency),
-            metadata=meta,
+            account=self.acc_name,
+            amount=Amount(row.amount, row.currency),
+            metadata={"csvid": row.csvid},
         )
         posting_dst = Posting(
             account=acct_dst,
-            amount=Amount(amount, currency, invert=True),
+            amount=Amount(row.amount, row.currency, invert=True),
         )
         postings = [posting_dst, posting_src]
 
         return Transaction(
             date=date,
             cleared=True,
-            payee=payee,
+            payee=row.payee,
             postings=postings,
         )

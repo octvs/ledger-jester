@@ -4,34 +4,130 @@ import csv
 import hashlib
 from abc import ABC, abstractmethod
 from collections import Counter, defaultdict
-from types import SimpleNamespace
+from dataclasses import dataclass, fields
+from functools import cached_property
+from typing import Generic, Self, TypeVar
 
 from ledger_wrapper import Ledger, Transaction
 
+CURRENCY_CODES: dict[str, str] = {"$": "USD", "£": "GBP", "€": "EUR"}
 
-class CsvConverter(ABC):
-    """Generic converter class for csv statements."""
 
-    COLS = {}
-    CURRENCY_CODES = {"$": "USD", "£": "GBP", "€": "EUR"}
+@dataclass
+class CsvRow(ABC):
+    """Generic dataclass for csv statement rows."""
+
+    @cached_property
+    def csvid(self) -> str:
+        """Compute the md5 sum on first access and cache the result."""
+        field_values = tuple(
+            getattr(self, field_name)
+            for field_name, _ in self._get_csv_fields()
+        )
+        raw_repr = repr(field_values).encode("utf-8")
+        return hashlib.md5(raw_repr).hexdigest()
+
+    @classmethod
+    def from_dict(cls, line: dict[str, str]) -> Self:
+        """Map raw CSV keys to dataclass attributes.
+
+        Args:
+            line: CSV row to be converted to a CsvRow dataclass instance.
+
+        Returns:
+            Dataclass instance.
+
+        """
+        kwargs = {
+            field_name: line[col_header]
+            for field_name, col_header in cls._get_csv_fields()
+        }
+        return cls(**kwargs)
+
+    @classmethod
+    def _get_csv_fields(cls) -> list[tuple[str, str]]:
+        """Return tuples of (dataclass_field_name, csv_column_header)."""
+        return [
+            (f.name, f.metadata["col"])
+            for f in fields(cls)
+            if "col" in f.metadata
+        ]
+
+    @classmethod
+    def get_headers(cls) -> set[str]:
+        """Extract all expected CSV headers from field metadata."""
+        return {col_header for _, col_header in cls._get_csv_fields()}
+
+    @staticmethod
+    def make_currency(currency: str) -> str:
+        """Convert if currency symbol to currency code, else return as is.
+
+        Args:
+            currency: String to be converted.
+
+        Returns:
+            Converted string.
+
+        """
+        if currency in CURRENCY_CODES.keys():
+            return CURRENCY_CODES[currency]
+        return currency
+
+    @staticmethod
+    def format_eu_number_to_us(numeric_str: str) -> str:
+        """Convert a European-formatted numeric string to US standard format.
+
+        Replaces thousands separators (dots) with nothing and the decimal
+        separator (comma) with a dot (e.g., '1.234,56' -> '1234.56').
+
+        Args:
+            numeric_str: The European number string to reformat.
+
+        Returns:
+            The reformatted numeric string.
+
+        """
+        return numeric_str.replace(".", "").replace(",", ".")
+
+
+RowT = TypeVar("RowT", bound=CsvRow)
+
+
+class CsvConverter(ABC, Generic[RowT]):
+    """Generic converter class for csv statements.
+
+    Attributes:
+        acc_name: The target account name associated with this converter instance.
+        ledger: The Ledger wrapper instance used to query existing transactions.
+
+    """
+
+    ROW_TYPE: type[RowT]
 
     def __init__(self, account: str) -> None:
         """Initialize converter with the target account name.
 
-        Additionally
-        - Casts COLS class attribute to a SimpleNamespace for easier access.
-        - Loads payees via self.fetch_related_accounts.
-        - Loads already synchronized xact ids via Ledger.fetch_all_metadata.
+        Loads related payees via self.fetch_related_accounts and
+        already synchronized transaction IDs via Ledger.fetch_all_metadata.
 
         Args:
-            account: Target account name.
+            account: The name of the target ledger account.
 
         """
         self.acc_name: str = account
         self.ledger: Ledger = Ledger()
-        self.cols: SimpleNamespace = SimpleNamespace(**self.COLS)
-        self._related_payees: dict = self.fetch_related_accounts()
-        self._synced_ids: set = self.ledger.fetch_all_metadata("csvid")
+        self._related_payees: dict[str, list[str]] = (
+            self.fetch_related_accounts()
+        )
+        self._synced_ids: set[str] = self.ledger.fetch_all_metadata("csvid")
+
+    def __init_subclass__(cls, **kwargs: object) -> None:
+        """Verify that converters explicitly define a ROW_TYPE attribute."""
+        super().__init_subclass__(**kwargs)
+        if "ROW_TYPE" not in cls.__dict__:
+            raise TypeError(
+                f"'{cls.__name__}' must explicitly declare a 'ROW_TYPE' attribute."
+            )
 
     def fetch_related_accounts(self) -> dict:
         """Load all payee/account pairs related to the target account.
@@ -67,25 +163,7 @@ class CsvConverter(ABC):
             return Counter(self._related_payees[payee]).most_common(1)[0][0]
         return "Expenses:Misc"
 
-    def get_identifier(self, row: dict) -> str:
-        """Calculate the md5 hash sum of the given row.
-
-        Sorts dictionary before writing updating hash object with each element.
-        Also encodes each dictionary element to utf-8 for consistency.
-
-        Args:
-            row: Dictionary object for the row being processed.
-
-        Returns:
-            A string consisting the hash calculated.
-
-        """
-        h = hashlib.md5()
-        for key in sorted(row.keys()):
-            h.update((f"{key}={row[key]}\n").encode("utf-8"))
-        return h.hexdigest()
-
-    def is_row_synced(self, row: dict) -> bool:
+    def is_row_synced(self, row: RowT) -> bool:
         """Check whether the given row is in already synchronized id list.
 
         Args:
@@ -95,9 +173,9 @@ class CsvConverter(ABC):
             True if row is already synchronized, False otherwise.
 
         """
-        return self.get_identifier(row) in self._synced_ids
+        return row.csvid in self._synced_ids
 
-    def skip_row(self, row: dict) -> bool:
+    def skip_row(self, row: RowT) -> bool:
         """Skip processing row if it is empty.
 
         Args:
@@ -110,7 +188,7 @@ class CsvConverter(ABC):
         return row is None
 
     @abstractmethod
-    def convert(self, row: dict) -> Transaction:
+    def convert(self, row: RowT) -> Transaction:
         """Convert given export row to a Transaction object.
 
         Args:
@@ -121,33 +199,3 @@ class CsvConverter(ABC):
 
         """
         pass
-
-    def make_currency(self, currency: str) -> str:
-        """Convert if currency symbol to currency code, else return as is.
-
-        Args:
-            currency: String to be converted.
-
-        Returns:
-            Converted string.
-
-        """
-        if currency in self.CURRENCY_CODES.keys():
-            return self.CURRENCY_CODES[currency]
-        return currency
-
-    @staticmethod
-    def format_eu_number_to_us(numeric_str: str) -> str:
-        """Convert a European-formatted numeric string to US standard format.
-
-        Replaces thousands separators (dots) with nothing and the decimal
-        separator (comma) with a dot (e.g., '1.234,56' -> '1234.56').
-
-        Args:
-            numeric_str: The European number string to reformat.
-
-        Returns:
-            The reformatted numeric string.
-
-        """
-        return numeric_str.replace(".", "").replace(",", ".")
