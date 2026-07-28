@@ -22,6 +22,10 @@ class Parser(ABC):
     TYPE: str | None = None
     FTYPE: str | None = None
 
+    def __init__(self) -> None:
+        """Initialize parser instance with a default empty subtype string."""
+        self.subtype: str = ""
+
     def assert_path(self, fpath: str) -> Path:
         """Check whether the file provided is supported by the parser.
 
@@ -66,7 +70,7 @@ class Parser(ABC):
 
         Preprocesses the group, drops the 'dt' column, and writes the
         result to a CSV file named after the group's month and the
-        parser's TYPE.
+        parser's TYPE, followed by its subtype if specified.
 
         Args:
             group (pd.DataFrame): A slice of the full DataFrame,
@@ -74,7 +78,7 @@ class Parser(ABC):
 
         """
         dt = group["dt"].reset_index(drop=True)[0].strftime("%Y%m")
-        fname = f"{dt}-{self.TYPE}.csv"
+        fname = f"{dt}-{self.TYPE}{self.subtype}.csv"
         group = self.preprocess_groups(group)
         group.drop("dt", axis=1).to_csv(fname, index=False)
         logging.info(f"Wrote {fname} to disk on cwd.")
