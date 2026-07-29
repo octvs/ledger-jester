@@ -73,6 +73,7 @@ class CeptetebConverter(CsvConverter[CeptetebRow]):
 
         return Transaction(
             date=date_start,
+            cleared=True,
             aux_date=date_comp,
             payee=row.payee,
             postings=postings,
