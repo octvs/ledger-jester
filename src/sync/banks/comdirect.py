@@ -20,7 +20,7 @@ class ComdirectRow(CsvRow):
     amount: str = field(metadata={"col": "Umsatz in EUR"})
 
     def __post_init__(self) -> None:
-        """Set currency by default to EUR."""
+        """Set currency by default to EUR and reformat amount decimal comma."""
         self.currency = "EUR"
         self.amount = self.format_eu_number_to_us(self.amount)
 
