@@ -27,8 +27,8 @@ class Parser(ABC):
     SUBTYPES: dict[str, str] = {}
 
     def __init__(self) -> None:
-        """Initialize parser instance with a default empty subtype string."""
-        self.subtype: str = ""
+        """Initialize parser instance with a default empty suffix string."""
+        self.suffix: str = ""
 
     def assert_path(self, fpath: str) -> Path:
         """Check whether the file provided is supported by the parser.
@@ -74,7 +74,7 @@ class Parser(ABC):
 
         Preprocesses the group, drops the 'dt' column, and writes the
         result to a CSV file named after the group's month and the
-        parser's TYPE, followed by its subtype if specified.
+        parser's TYPE, followed by its suffix if specified.
 
         Args:
             group: A slice of the full DataFrame,
@@ -82,7 +82,7 @@ class Parser(ABC):
 
         """
         dt = group["dt"].reset_index(drop=True)[0].strftime("%Y%m")
-        fname = f"{dt}-{self.TYPE}{self.subtype}.csv"
+        fname = f"{dt}-{self.TYPE}{self.suffix}.csv"
         group = self.preprocess_groups(group)
         group.drop("dt", axis=1).to_csv(fname, index=False)
         logging.info(f"Wrote {fname} to disk on cwd.")
@@ -117,11 +117,11 @@ class Parser(ABC):
             if not group.empty:
                 self.write_group(group)
 
-    def assign_subtype(self, acc_type: str) -> None:
-        """Assign account subtype before writing file.
+    def assign_subtype_suffix(self, acc_type: str) -> None:
+        """Assign account fname suffix for subtype before writing file.
 
         Args:
-            acc_type: String to be used to infer account subtype.
+            acc_type: String to be used to infer account subtype suffix.
 
         Raises:
             ValueError: If subtype is not defined on the SUBTYPES dict.
@@ -131,4 +131,6 @@ class Parser(ABC):
             raise ValueError(
                 f"Account type: {acc_type} is not recognized, can't recover."
             )
-        self.subtype = self.SUBTYPES[acc_type]
+        if self.SUBTYPES[acc_type]:
+            self.suffix = self.SUBTYPES[acc_type]
+            logging.debug(f"Assigned subtype suffix: {self.suffix}")

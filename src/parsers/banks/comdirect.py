@@ -23,7 +23,7 @@ class ComdirectParser(Parser):
         """Read a Comdirect CSV export and return a DataFrame."""
         lines = fpath.read_text(encoding="latin-1").splitlines()
         subtype_str = re.findall(r'Umsätze\s+([^"]+)', lines[1])[0]
-        self.assign_subtype(subtype_str)
+        self.assign_subtype_suffix(subtype_str)
         df = pd.read_csv(StringIO("\n".join(lines[4:-3])), sep=";")
         df = df.dropna(how="all", axis=1)
         df["dt"] = pd.to_datetime(df["Buchungstag"], format="%d.%m.%Y")

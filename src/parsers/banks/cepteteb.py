@@ -25,7 +25,7 @@ class CeptetebParser(Parser):
         # Remove the empty thead placeholder rows that break column inference
         html = re.sub(r"<thead.*?</thead>", "", html, flags=re.DOTALL)
         tables = pd.read_html(StringIO(html), thousands=".", decimal=",")
-        self.assign_subtype(tables[2].iat[3, 1])
+        self.assign_subtype_suffix(tables[2].iat[3, 1])
         df = tables[3].dropna(how="all", axis=0)
         df["Dekont"] = df["Dekont"].astype(int)
         df["dt"] = pd.to_datetime(
