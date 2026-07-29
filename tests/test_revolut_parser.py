@@ -102,42 +102,6 @@ def test_read_file_empty_file_raises(tmp_path: Path) -> None:
         parser.read_file(empty_csv)
 
 
-def test_preprocess_groups_sorts_by_dt_and_product() -> None:
-    """Rows are sorted by dt first, then Product, ascending."""
-    df = pd.DataFrame(
-        {
-            "dt": pd.to_datetime(["2024-01-02", "2024-01-01", "2024-01-01"]),
-            "Product": ["Current", "Deposit", "Current"],
-            "Amount": [1, 2, 3],
-        }
-    )
-    parser = RevolutParser()
-    result = parser.preprocess_groups(df).reset_index(drop=True)
-
-    assert (
-        result["dt"].tolist()
-        == pd.to_datetime(["2024-01-01", "2024-01-01", "2024-01-02"]).tolist()
-    )
-    assert result["Product"].tolist() == ["Current", "Deposit", "Current"]
-
-
-def test_preprocess_groups_stable_for_exact_ties() -> None:
-    """Rows tied on both dt and Product must preserve original order."""
-    df = pd.DataFrame(
-        {
-            "dt": pd.to_datetime(
-                ["2024-01-01 09:22:22", "2024-01-01 09:22:22"]
-            ),
-            "Product": ["Current", "Current"],
-            "Amount": ["first", "second"],
-        }
-    )
-    parser = RevolutParser()
-    result = parser.preprocess_groups(df).reset_index(drop=True)
-
-    assert result["Amount"].tolist() == ["first", "second"]
-
-
 def test_parse_writes_one_file_per_month(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:

@@ -23,8 +23,3 @@ class RevolutParser(Parser):
             df["Completed Date"], format="%Y-%m-%d %H:%M:%S"
         )
         return df
-
-    @override
-    def preprocess_groups(self, group: pd.DataFrame) -> pd.DataFrame:
-        """Sort a monthly group by completion date and product, stably."""
-        return group.sort_values(by=["dt", "Product"], kind="stable")

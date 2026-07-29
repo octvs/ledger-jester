@@ -72,9 +72,9 @@ class Parser(ABC):
     def write_group(self, group: pd.DataFrame) -> None:
         """Write a group (i.e. month) to its destination.
 
-        Preprocesses the group, drops the 'dt' column, and writes the
-        result to a CSV file named after the group's month and the
-        parser's TYPE, followed by its suffix if specified.
+        Drops the 'dt' column, and writes the result to a CSV file named after
+        the group's month and the parser's TYPE, followed by its suffix if
+        specified.
 
         Args:
             group: A slice of the full DataFrame,
@@ -83,25 +83,8 @@ class Parser(ABC):
         """
         dt = group["dt"].reset_index(drop=True)[0].strftime("%Y%m")
         fname = f"{dt}-{self.TYPE}{self.suffix}.csv"
-        group = self.preprocess_groups(group)
         group.drop("dt", axis=1).to_csv(fname, index=False)
         logging.info(f"Wrote {fname} to disk on cwd.")
-
-    def preprocess_groups(self, group: pd.DataFrame) -> pd.DataFrame:
-        """Preprocess a group before writing, i.e. sorting.
-
-        Subclasses may override this to apply custom transformations
-        (e.g. sorting rows, renaming columns) prior to writing the
-        group to disk. Default implementation is a no-op.
-
-        Args:
-            group: A slice of the full DataFrame.
-
-        Returns:
-            pd.DataFrame: The preprocessed group.
-
-        """
-        return group
 
     def parse(self, fpath: str) -> None:
         """Read a file and write all non-empty groups.
