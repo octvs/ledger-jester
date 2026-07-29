@@ -16,11 +16,15 @@ class Parser(ABC):
             Must be set by subclasses.
         FTYPE (str | None): File extension supported for the parser.
             Must be set by subclasses.
+        SUBTYPES (dict[str,str]): Subtype definitions for the account.
+            Must be set by subclasses if the parser is required to support
+            multiple sub-accounts.
 
     """
 
     TYPE: str | None = None
     FTYPE: str | None = None
+    SUBTYPES: dict[str, str] = {}
 
     def __init__(self) -> None:
         """Initialize parser instance with a default empty subtype string."""
@@ -112,3 +116,19 @@ class Parser(ABC):
         for _, group in self.groups(df):
             if not group.empty:
                 self.write_group(group)
+
+    def assign_subtype(self, acc_type: str) -> None:
+        """Assign account subtype before writing file.
+
+        Args:
+            acc_type: String to be used to infer account subtype.
+
+        Raises:
+            ValueError: If subtype is not defined on the SUBTYPES dict.
+
+        """
+        if acc_type not in self.SUBTYPES:
+            raise ValueError(
+                f"Account type: {acc_type} is not recognized, can't recover."
+            )
+        self.subtype = self.SUBTYPES[acc_type]
