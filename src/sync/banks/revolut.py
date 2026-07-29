@@ -81,7 +81,9 @@ class RevolutConverter(CsvConverter[RevolutRow]):
 
         fee = Amount(row.fee, row.currency)
         if fee > 0:
-            postings.append(Posting("Expenses:Finance:Revolut", fee))
+            postings.append(
+                Posting(f"Expenses:Finance:{self.TYPE.capitalize()}", fee)
+            )
 
         if date_start.date() == date_comp.date():
             date_comp = None
