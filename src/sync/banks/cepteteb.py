@@ -54,6 +54,7 @@ class CeptetebConverter(CsvConverter[CeptetebRow]):
 
         if self.acc_name.split(":")[-1] == "EUR":
             row.currency = "EUR"
+            row.csvid = row.csvid.replace(".", "eur.")
 
         posting_src = Posting(
             account=self.acc_name,
