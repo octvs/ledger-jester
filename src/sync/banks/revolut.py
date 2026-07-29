@@ -1,5 +1,6 @@
 """Converter implementation for Revolut csv statements."""
 
+import re
 from dataclasses import dataclass, field
 from datetime import datetime as dt
 from typing import override
@@ -21,6 +22,11 @@ class RevolutRow(CsvRow):
     currency: str = field(metadata={"col": "Currency"})
     state: str = field(metadata={"col": "State"})
     balance: str = field(metadata={"col": "Balance"})
+
+    def __post_init__(self) -> None:
+        """Remove date string from payee to allow matching across dates."""
+        _prefix = 'Net interest paid to "Instant Access Savings"'
+        self.payee = re.sub(_prefix + ".*$", _prefix, self.payee)
 
 
 @REGISTRY.register
