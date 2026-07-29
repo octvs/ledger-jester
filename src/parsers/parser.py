@@ -30,7 +30,7 @@ class Parser(ABC):
         """Check whether the file provided is supported by the parser.
 
         Args:
-            fpath (str): Path to the input file.
+            fpath: Path to the input file.
 
         """
         _fpath = Path(fpath)
@@ -45,7 +45,7 @@ class Parser(ABC):
         """Read a file and return a DataFrame.
 
         Args:
-            fpath (Path): Path to the input file.
+            fpath: Path to the input file.
 
         Returns:
             pd.DataFrame: Parsed data with a 'dt' datetime column.
@@ -57,7 +57,7 @@ class Parser(ABC):
         """Split a DataFrame into monthly groups.
 
         Args:
-            df (pd.DataFrame): Full DataFrame with a 'dt' datetime column.
+            df: Full DataFrame with a 'dt' datetime column.
 
         Returns:
             DataFrameGroupBy: Grouped by month end frequency.
@@ -73,7 +73,7 @@ class Parser(ABC):
         parser's TYPE, followed by its subtype if specified.
 
         Args:
-            group (pd.DataFrame): A slice of the full DataFrame,
+            group: A slice of the full DataFrame,
                 corresponding to a single month.
 
         """
@@ -91,7 +91,7 @@ class Parser(ABC):
         group to disk. Default implementation is a no-op.
 
         Args:
-            group (pd.DataFrame): A slice of the full DataFrame.
+            group: A slice of the full DataFrame.
 
         Returns:
             pd.DataFrame: The preprocessed group.
@@ -103,7 +103,7 @@ class Parser(ABC):
         """Read a file and write all non-empty groups.
 
         Args:
-            fpath (str): Path to the input file.
+            fpath: Path to the input file.
 
         """
         _fpath = self.assert_path(fpath)
