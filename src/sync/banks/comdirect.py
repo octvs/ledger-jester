@@ -16,7 +16,8 @@ class ComdirectRow(CsvRow):
 
     date: str = field(metadata={"col": "Buchungstag"})
     date_comp: str = field(metadata={"col": "Wertstellung (Valuta)"})
-    payee: str = field(metadata={"col": "Buchungstext"})
+    payee: str = field(metadata={"col": "Vorgang"})
+    details: str = field(metadata={"col": "Buchungstext"})
     amount: str = field(metadata={"col": "Umsatz in EUR"})
 
     def __post_init__(self) -> None:
@@ -27,10 +28,8 @@ class ComdirectRow(CsvRow):
     @override
     @cached_property
     def csvid(self) -> str:
-        """Extract the reference number from payee field."""
-        ref_num = re.findall(r"Ref\.\s(\S+)", self.payee)[0]
-        self.payee = self.payee.replace(f"Ref. {ref_num}", "").strip()
-        return f"comdirect.{ref_num}"
+        """Extract the reference number from details field."""
+        return f"comdirect.{re.findall(r'Ref\.\s(\S+)', self.details)[0]}"
 
 
 @REGISTRY.register
