@@ -29,11 +29,7 @@ class AmazonVisaRow(CsvRow):
 
 @REGISTRY.register
 class AmazonVisaConverter(CsvConverter[AmazonVisaRow]):
-    """Converter class for Amazon Visa csv statements.
-
-    Currently disregards "Punkte" column which holds amazon points for the
-    transcation.
-    """
+    """Converter class for Amazon Visa csv statements."""
 
     TYPE = "amazonvisa"
     ROW_TYPE = AmazonVisaRow
