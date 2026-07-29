@@ -19,7 +19,7 @@ class VWBankRow(CsvRow):
     _amount1: str = field(metadata={"col": "Haben (EUR)"})
 
     def __post_init__(self) -> None:
-        """TODO."""
+        """Set default currency to EUR, merge two amount columns to single."""
         self.currency = "EUR"
         _amount = self._amount1
         if not _amount:
