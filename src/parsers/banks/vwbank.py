@@ -20,5 +20,6 @@ class VWBankParser(Parser):
         """Read a VW Bank CSV export and return a DataFrame."""
         df = pd.read_csv(fpath, header=6, sep=";")
         df = df.dropna(how="all", axis=1)
+        df = df.drop("Nr.", axis=1)
         df["dt"] = pd.to_datetime(df["Buchungsdatum"], format="%d.%m.%Y")
         return df
