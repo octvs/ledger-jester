@@ -10,7 +10,7 @@ from sync import REGISTRY, CsvConverter, CsvRow
 
 @dataclass
 class VWBankRow(CsvRow):
-    """Dataclass representing a transaction row from Revolut exports."""
+    """Dataclass representing a transaction row from VWBank exports."""
 
     date: str = field(metadata={"col": "Buchungsdatum"})
     payee: str = field(metadata={"col": "Umsatzart"})
@@ -37,7 +37,7 @@ class VWBankConverter(CsvConverter[VWBankRow]):
 
     @override
     def convert(self, row: VWBankRow) -> Transaction:
-        """Convert given Revolut export row to a Transaction object."""
+        """Convert given VWBank export row to a Transaction object."""
         date_start = dt.strptime(row.date, self.DATE_FORMAT)
         date_comp = dt.strptime(row.date_comp, self.DATE_FORMAT)
         acct_dst = self.get_account_by_payee(row.payee)
