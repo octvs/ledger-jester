@@ -31,7 +31,7 @@ def main(args: argparse.Namespace) -> None:
     """Run the 'convert' subcommand.
 
     Args:
-        args: Parsed CLI arguments containing 'fpath'.
+        args: Parsed CLI arguments containing 'account' and 'fpath'.
 
     """
     with open(args.fpath, mode="r", newline="") as f:

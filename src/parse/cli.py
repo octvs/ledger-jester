@@ -31,7 +31,7 @@ def main(args: argparse.Namespace) -> None:
     """Run the 'parse' subcommand.
 
     Args:
-        args: Parsed CLI arguments containing 'fpath' and 'type'.
+        args: Parsed CLI arguments containing 'type' and 'fpath'.
 
     """
     parser = REGISTRY.get(args.type)()
