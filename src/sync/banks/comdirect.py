@@ -18,12 +18,16 @@ class ComdirectRow(CsvRow):
     date_comp: str = field(metadata={"col": "Wertstellung (Valuta)"})
     payee: str = field(metadata={"col": "Vorgang"})
     details: str = field(metadata={"col": "Buchungstext"})
-    amount: str = field(metadata={"col": "Umsatz in EUR"})
+    raw_amount: str = field(metadata={"col": "Umsatz in EUR"})
+
+    # Processed attributes
+    amount: str = field(init=False)
+    currency: str = field(init=False)
 
     def __post_init__(self) -> None:
         """Set currency by default to EUR and reformat amount decimal comma."""
-        self.currency = "EUR"
-        self.amount = self.format_eu_number_to_us(self.amount)
+        self.currency = "EUR"  # TODO: Is this embedded on the source file?
+        self.amount = self.format_eu_number_to_us(self.raw_amount)
 
     @override
     @cached_property

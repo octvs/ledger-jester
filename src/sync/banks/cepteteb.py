@@ -21,6 +21,9 @@ class CeptetebRow(CsvRow):
     balance: str = field(metadata={"col": "Bakiye"})
     id: str = field(metadata={"col": "Dekont"})
 
+    # Processed attributes
+    currency: str = field(init=False)
+
     def __post_init__(self) -> None:
         """Set currency by default to TRY."""
         self.currency = "TRY"

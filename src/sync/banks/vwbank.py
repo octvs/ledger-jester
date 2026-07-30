@@ -15,16 +15,19 @@ class VWBankRow(CsvRow):
     date: str = field(metadata={"col": "Buchungsdatum"})
     payee: str = field(metadata={"col": "Umsatzart"})
     date_comp: str = field(metadata={"col": "Wertstellung"})
-    _amount0: str = field(metadata={"col": "Soll (EUR)"})
-    _amount1: str = field(metadata={"col": "Haben (EUR)"})
+    raw_amount0: str = field(metadata={"col": "Soll (EUR)"})
+    raw_amount1: str = field(metadata={"col": "Haben (EUR)"})
+
+    # Processed attributes
+    amount: str = field(init=False)
+    currency: str = field(init=False)
 
     def __post_init__(self) -> None:
         """Set default currency to EUR, merge two amount columns to single."""
         self.currency = "EUR"
-        _amount = self._amount1
-        if not _amount:
-            _amount = "-" + self._amount0
-        self.amount = self.format_eu_number_to_us(_amount)
+        self.amount = self.format_eu_number_to_us(
+            self.raw_amount1 if self.raw_amount1 else "-" + self.raw_amount0
+        )
 
 
 @REGISTRY.register

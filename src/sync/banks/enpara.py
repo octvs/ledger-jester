@@ -17,6 +17,9 @@ class EnparaRow(CsvRow):
     amount: str = field(metadata={"col": "İşlem Tutarı (TL)"})
     balance: str = field(metadata={"col": "Bakiye (TL)"})
 
+    # Processed attributes
+    currency: str = field(init=False)
+
     def __post_init__(self) -> None:
         """Set currency by default to TRY."""
         self.currency = "TRY"
