@@ -1,5 +1,6 @@
 """Converter implementation for Enpara csv statements."""
 
+import re
 from dataclasses import dataclass, field
 from datetime import datetime as dt
 from typing import override
@@ -20,10 +21,18 @@ class EnparaRow(CsvRow):
     # Processed attributes
     currency: str = field(init=False)
 
+    PAYEE_FILTERS: tuple[tuple[re.Pattern, str], ...] = (
+        # Strip bank transaction details after comma from transfers
+        (re.compile(r"\s*,.*$"), ""),
+        # Strip extra details from interest payment
+        (re.compile(r"\%\S*( kampanyalı)* faiz oranı ile 1 g"), "G"),
+    )
+
     def __post_init__(self) -> None:
-        """Set currency by default to TRY, discard payee after comma."""
+        """Set currency by default to TRY, filter payee names."""
         self.currency = "TRY"
-        self.payee = self.payee.split(",")[0]
+        for pattern, replacement in self.PAYEE_FILTERS:
+            self.payee = pattern.sub(replacement, self.payee)
 
 
 @REGISTRY.register
