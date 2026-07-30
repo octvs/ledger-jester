@@ -20,19 +20,24 @@ class CeptetebRow(CsvRow):
     amount: str = field(metadata={"col": "Tutar"})
     balance: str = field(metadata={"col": "Bakiye"})
     id: str = field(metadata={"col": "Dekont"})
-
-    # Processed attributes
-    currency: str = field(init=False)
+    currency: str = field(metadata={"col": "Kur"})
 
     def __post_init__(self) -> None:
-        """Set currency by default to TRY."""
-        self.currency = "TRY"
+        """Map currency codes to versions used in ledger-jester."""
+        self.currency = self.make_currency(self.currency)
 
     @override
     @cached_property
     def csvid(self) -> str:
-        """Set id provided by bank to csvid."""
-        return f"cepteteb.{self.id}"
+        """Set id provided by bank to csvid.
+
+        Same id int is given for xacts between two sub-accounts, where
+        synchronizing one would make the other appear already synced. To
+        differentiate them the function attaches a suffix by checking whether
+        currency is set to another value.
+        """
+        _suffix = "eur" if self.currency == "EUR" else ""
+        return f"cepteteb{_suffix}.{self.id}"
 
 
 @REGISTRY.register
@@ -45,19 +50,10 @@ class CeptetebConverter(CsvConverter[CeptetebRow]):
 
     @override
     def convert(self, row: CeptetebRow) -> Transaction:
-        """Convert given Cepteteb export row to a Transaction object.
-
-        If the target account ends with "EUR" it changes the currency
-        accordingly, since the source statement files doesn't have this info.
-
-        """
+        """Convert given Cepteteb export row to a Transaction object."""
         date_start = dt.strptime(row.date, self.DATE_FORMAT)
         date_comp = dt.strptime(row.date_comp, self.DATE_FORMAT)
         acct_dst = self.get_account_by_payee(row.payee)
-
-        if self.acc_name.split(":")[-1] == "EUR":
-            row.currency = "EUR"
-            row.csvid = row.csvid.replace(".", "eur.")
 
         posting_src = Posting(
             account=self.acc_name,
