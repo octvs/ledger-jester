@@ -21,8 +21,9 @@ class EnparaRow(CsvRow):
     currency: str = field(init=False)
 
     def __post_init__(self) -> None:
-        """Set currency by default to TRY."""
+        """Set currency by default to TRY, discard payee after comma."""
         self.currency = "TRY"
+        self.payee = self.payee.split(",")[0]
 
 
 @REGISTRY.register
