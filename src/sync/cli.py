@@ -50,6 +50,7 @@ def main(args: argparse.Namespace) -> None:
         parser.assert_path(fpath)
         df = parser.read_file(fpath).sort_values(by="dt")
         logging.info(f"Read {fpath} from disk.")
+        df = df.astype(str)  # Cast to str to get consistent hashes w/ convert
         for _row in df.to_dict(orient="records"):
             row = converter.ROW_TYPE.from_dict(_row)
             if not (converter.skip_row(row) or converter.is_row_synced(row)):
