@@ -30,19 +30,17 @@ class Parser(ABC):
         """Initialize parser instance with a default empty suffix string."""
         self.suffix: str = ""
 
-    def assert_path(self, fpath: str) -> Path:
+    def assert_path(self, fpath: Path) -> None:
         """Check whether the file provided is supported by the parser.
 
         Args:
             fpath: Path to the input file.
 
         """
-        _fpath = Path(fpath)
-        if _fpath.suffix != f".{self.FTYPE}":
-            raise ValueError(f"Unsupported file extension: {_fpath.suffix}")
-        if not _fpath.exists():
+        if fpath.suffix != f".{self.FTYPE}":
+            raise ValueError(f"Unsupported file extension: {fpath.suffix}")
+        if not fpath.exists():
             raise FileNotFoundError(f"Path given does not exist: {fpath}")
-        return _fpath
 
     @abstractmethod
     def read_file(self, fpath: Path) -> pd.DataFrame:
@@ -86,16 +84,16 @@ class Parser(ABC):
         group.drop("dt", axis=1).to_csv(fname, index=False)
         logging.info(f"Wrote {fname} to disk on cwd.")
 
-    def parse(self, fpath: str) -> None:
+    def parse(self, fpath: Path) -> None:
         """Read a file and write all non-empty groups.
 
         Args:
             fpath: Path to the input file.
 
         """
-        _fpath = self.assert_path(fpath)
-        df = self.read_file(_fpath)
-        logging.info(f"Read {_fpath} from disk.")
+        self.assert_path(fpath)
+        df = self.read_file(fpath)
+        logging.info(f"Read {fpath} from disk.")
         for _, group in self.groups(df):
             if not group.empty:
                 self.write_group(group)

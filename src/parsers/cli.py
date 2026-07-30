@@ -1,6 +1,7 @@
 """'parse' subcommand: convert a bank export into monthly CSV chunks."""
 
 import argparse
+from pathlib import Path
 
 from parsers import REGISTRY
 
@@ -21,7 +22,7 @@ def add_subparser(subparsers: argparse._SubParsersAction) -> None:
         help="Parser type to use.",
     )
     parse_cmd.add_argument(
-        "fpath", type=str, metavar="FILE", help="Export file to be parsed."
+        "fpath", type=Path, metavar="FILE", help="Export file to be parsed."
     )
     parse_cmd.set_defaults(func=main)
 

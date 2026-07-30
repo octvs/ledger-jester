@@ -9,7 +9,7 @@ import pytest
 from parsers import REGISTRY
 from parsers.banks.revolut import RevolutParser
 
-FIXTURE = str(Path(__file__).parent / "fixtures" / "revolut_sample.csv")
+FIXTURE = Path(__file__).parent.joinpath("fixtures", "revolut_sample.csv")
 
 EXPECTED_COLUMNS = [
     "Type",
@@ -34,7 +34,7 @@ def test_registry_returns_revolut_parser() -> None:
 def test_read_file_dt_matches_completed_date() -> None:
     """Dt must be a faithful parse of Completed Date, not just present."""
     parser = RevolutParser()
-    df = parser.read_file(parser.assert_path(FIXTURE))
+    df = parser.read_file(FIXTURE)
 
     expected = pd.to_datetime(df["Completed Date"], format="%Y-%m-%d %H:%M:%S")
     pd.testing.assert_series_equal(df["dt"], expected, check_names=False)
@@ -43,7 +43,7 @@ def test_read_file_dt_matches_completed_date() -> None:
 def test_read_file_numeric_columns_are_numeric() -> None:
     """Guards against decimal/thousands misparsing (as happened with CeptTEB)."""
     parser = RevolutParser()
-    df = parser.read_file(parser.assert_path(FIXTURE))
+    df = parser.read_file(FIXTURE)
 
     for col in ("Amount", "Fee", "Balance"):
         assert pd.api.types.is_float_dtype(df[col]), (
@@ -58,7 +58,7 @@ def test_read_file_preserves_original_schema() -> None:
     type by column signature.
     """
     parser = RevolutParser()
-    df = parser.read_file(parser.assert_path(FIXTURE))
+    df = parser.read_file(FIXTURE)
 
     assert [c for c in df.columns if c != "dt"] == EXPECTED_COLUMNS
 
@@ -70,7 +70,7 @@ def test_assert_path_wrong_extension_raises(tmp_path: Path) -> None:
 
     parser = RevolutParser()
     with pytest.raises(ValueError, match="Unsupported file extension"):
-        parser.assert_path(str(bad_file))
+        parser.assert_path(bad_file)
 
 
 def test_assert_path_not_existing_file_raises(tmp_path: Path) -> None:
@@ -79,7 +79,7 @@ def test_assert_path_not_existing_file_raises(tmp_path: Path) -> None:
 
     parser = RevolutParser()
     with pytest.raises(FileNotFoundError, match="Path given does not exist"):
-        parser.assert_path(str(bad_file))
+        parser.assert_path(bad_file)
 
 
 def test_read_file_missing_required_column_raises(tmp_path: Path) -> None:
@@ -109,7 +109,7 @@ def test_parse_writes_one_file_per_month(
     monkeypatch.chdir(tmp_path)
 
     parser = RevolutParser()
-    parser.parse(str(FIXTURE))
+    parser.parse(FIXTURE)
 
     output_files = sorted(f.name for f in tmp_path.glob("*.csv"))
     assert output_files == ["202401-revolut.csv", "202402-revolut.csv"]
@@ -128,7 +128,7 @@ def test_parse_splits_rows_into_correct_month_file(
     monkeypatch.chdir(tmp_path)
 
     parser = RevolutParser()
-    parser.parse(str(FIXTURE))
+    parser.parse(FIXTURE)
 
     jan = pd.read_csv(tmp_path / "202401-revolut.csv")
     feb = pd.read_csv(tmp_path / "202402-revolut.csv")
@@ -148,7 +148,7 @@ def test_parse_output_matches_original_schema(
     monkeypatch.chdir(tmp_path)
 
     parser = RevolutParser()
-    parser.parse(str(FIXTURE))
+    parser.parse(FIXTURE)
 
     for f in tmp_path.glob("*.csv"):
         written = pd.read_csv(f)
