@@ -3,7 +3,7 @@
 import re
 from dataclasses import dataclass, field
 from datetime import datetime as dt
-from typing import List, Tuple, override
+from typing import override
 
 from ledger_wrapper import Amount, Posting, Transaction
 from sync import REGISTRY, CsvConverter, CsvRow
@@ -28,12 +28,12 @@ class RevolutRow(CsvRow):
     state: str = field(metadata={"col": "State"})
     balance: str = field(metadata={"col": "Balance"})
 
-    PAYEE_FILTERS: List[Tuple[re.Pattern, str]] = [
+    PAYEE_FILTERS: tuple[tuple[re.Pattern, str], ...] = (
         # Strip bank transaction prefixes from transfers
         (re.compile(r"^(From |To |Payment from )"), ""),
         # Strip account and date strings from interest payment
         (re.compile(r"^(Net interest paid) to .*"), r"\1"),
-    ]
+    )
 
     def __post_init__(self) -> None:
         """Remove date string from payee to allow matching across dates."""
