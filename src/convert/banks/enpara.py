@@ -1,50 +1,48 @@
-"""Converter implementation for Enpara Credit Card csv statements."""
+"""Converter implementation for Enpara csv statements."""
 
 from dataclasses import dataclass, field
 from datetime import datetime as dt
 from typing import override
 
+from convert import REGISTRY, CsvConverter, CsvRow
 from ledger_wrapper import Amount, Posting, Transaction
-from sync import REGISTRY, CsvConverter, CsvRow
 
 
 @dataclass
-class EnparaCCRow(CsvRow):
-    """Dataclass representing a transaction row from Enpara CCard exports."""
+class EnparaRow(CsvRow):
+    """Dataclass representing a transaction row from Enpara exports."""
 
-    date: str = field(metadata={"col": "İşlem Tarihi"})
+    date: str = field(metadata={"col": "Tarih"})
     payee: str = field(metadata={"col": "Açıklama"})
-    raw_amount: str = field(metadata={"col": "Tutar"})
+    amount: str = field(metadata={"col": "İşlem Tutarı (TL)"})
+    balance: str = field(metadata={"col": "Bakiye (TL)"})
 
     # Processed attributes
-    amount: str = field(init=False)
     currency: str = field(init=False)
 
     def __post_init__(self) -> None:
         """Set currency by default to TRY."""
-        # Remove whitespace after negative sign if present before spliting
-        _raw_amount = self.raw_amount.replace("- ", "-").split(" ")
-        self.amount = self.format_eu_number_to_us(_raw_amount[0])
-        self.currency = self.make_currency(_raw_amount[1])
+        self.currency = "TRY"
 
 
 @REGISTRY.register
-class EnparaCCConverter(CsvConverter[EnparaCCRow]):
-    """Converter class for Enpara Credit Card csv statements."""
+class EnparaConverter(CsvConverter[EnparaRow]):
+    """Converter class for Enpara csv statements."""
 
-    TYPE = "enparacc"
-    ROW_TYPE = EnparaCCRow
+    TYPE = "enpara"
+    ROW_TYPE = EnparaRow
     DATE_FORMAT = "%d/%m/%Y"
 
     @override
-    def convert(self, row: EnparaCCRow) -> Transaction:
-        """Convert given Enpara CCard export row to a Transaction object."""
+    def convert(self, row: EnparaRow) -> Transaction:
+        """Convert given Enpara export row to a Transaction object."""
         date_start = dt.strptime(row.date, self.DATE_FORMAT)
         acct_dst = self.get_account_by_payee(row.payee)
 
         posting_src = Posting(
             account=self.acc_name,
             amount=Amount(row.amount, row.currency),
+            asserted=Amount(row.balance, row.currency),
             metadata={"csvid": row.csvid},
         )
         posting_dst = Posting(

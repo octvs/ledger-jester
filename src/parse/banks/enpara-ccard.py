@@ -8,7 +8,7 @@ from typing import override
 import pandas as pd
 import pdfplumber
 
-from parsers import REGISTRY, Parser
+from parse import REGISTRY, Parser
 
 
 @REGISTRY.register

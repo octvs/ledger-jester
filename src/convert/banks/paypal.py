@@ -5,8 +5,8 @@ from datetime import datetime as dt
 from functools import cached_property
 from typing import override
 
+from convert import REGISTRY, CsvConverter, CsvRow
 from ledger_wrapper import Amount, Posting, Transaction
-from sync import REGISTRY, CsvConverter, CsvRow
 
 
 @dataclass

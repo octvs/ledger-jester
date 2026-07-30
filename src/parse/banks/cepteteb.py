@@ -7,7 +7,7 @@ from typing import override
 
 import pandas as pd
 
-from parsers import REGISTRY, Parser
+from parse import REGISTRY, Parser
 
 
 @REGISTRY.register

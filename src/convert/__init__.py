@@ -1,9 +1,9 @@
-"""Sync module with its own registry for converter implementations."""
+"""Convert module with its own registry for converter implementations."""
 
 from typing import Sequence, Type
 
+from convert.converter import CsvConverter, CsvRow
 from registry import Registry, T
-from sync.converter import CsvConverter, CsvRow
 
 
 class ConverterRegistry(Registry):
@@ -33,6 +33,6 @@ class ConverterRegistry(Registry):
 REGISTRY = ConverterRegistry()
 
 # Must run last to initialize after the rest
-from sync import banks  # noqa: F401, E402
+from convert import banks  # noqa: F401, E402
 
 __all__ = ["CsvConverter", "CsvRow", "REGISTRY"]

@@ -1,7 +1,7 @@
 """Generic name -> class registry for building extensible plugin systems.
 
-This module provides a Registry class. Each submodule (e.g. "parsers", "sync")
-can extend this to create its own registry.
+This module provides a Registry class. Each submodule (e.g. "parsers",
+"convert") can extend this to create its own registry.
 
 Typical usage:
 

@@ -1,34 +1,34 @@
-"""'sync' subcommand: sync a CSV export into the ledger file."""
+"""'convert' subcommand: convert a CSV export into the ledger file."""
 
 import argparse
 import csv
 from pathlib import Path
 
-from sync import REGISTRY
+from convert import REGISTRY
 
 
 def add_subparser(subparsers: argparse._SubParsersAction) -> None:
-    """Register the 'sync' subcommand.
+    """Register the 'convert' subcommand.
 
     Args:
         subparsers: The subparsers action from the parent ArgumentParser.
 
     """
-    sync_cmd = subparsers.add_parser("sync", help="Sync ledger data.")
-    sync_cmd.add_argument(
+    convert_cmd = subparsers.add_parser("convert", help="Convert to ledger.")
+    convert_cmd.add_argument(
         "account",
         type=str,
         metavar="ACCT",
         help="Target account.",
     )
-    sync_cmd.add_argument(
-        "fpath", type=Path, metavar="FILE", help="Csv file to be synced."
+    convert_cmd.add_argument(
+        "fpath", type=Path, metavar="FILE", help="Csv file to be converted."
     )
-    sync_cmd.set_defaults(func=main)
+    convert_cmd.set_defaults(func=main)
 
 
 def main(args: argparse.Namespace) -> None:
-    """Run the 'sync' subcommand.
+    """Run the 'convert' subcommand.
 
     Args:
         args: Parsed CLI arguments containing 'fpath'.

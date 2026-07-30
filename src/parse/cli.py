@@ -3,7 +3,7 @@
 import argparse
 from pathlib import Path
 
-from parsers import REGISTRY
+from parse import REGISTRY
 
 
 def add_subparser(subparsers: argparse._SubParsersAction) -> None:

@@ -6,8 +6,8 @@ from pathlib import Path
 import pandas as pd
 import pytest
 
-from parsers import REGISTRY
-from parsers.banks.revolut import RevolutParser
+from parse import REGISTRY
+from parse.banks.revolut import RevolutParser
 
 FIXTURE = Path(__file__).parent.joinpath("fixtures", "revolut_sample.csv")
 
@@ -54,7 +54,7 @@ def test_read_file_numeric_columns_are_numeric() -> None:
 def test_read_file_preserves_original_schema() -> None:
     """Dt is an internal-only column; original export schema must be untouched.
 
-    This is what allows downstream sync scripts to auto-detect export
+    This is what allows downstream convert scripts to auto-detect export
     type by column signature.
     """
     parser = RevolutParser()
@@ -142,7 +142,7 @@ def test_parse_output_matches_original_schema(
 ) -> None:
     """Assert written CSVs match the original export's column schema.
 
-    This is the contract sync scripts rely on for auto-detecting export
+    This is the contract convert scripts rely on for auto-detecting export
     type by column signature, with no 'dt' leakage.
     """
     monkeypatch.chdir(tmp_path)

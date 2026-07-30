@@ -4,7 +4,7 @@ See parsers.parser.Parser for the base contract every bank-specific
 parser implements, and parsers.banks for concrete implementations.
 """
 
-from parsers.parser import Parser
+from parse.parser import Parser
 from registry import Registry
 
 
@@ -17,6 +17,6 @@ class ParserRegistry(Registry):
 REGISTRY = ParserRegistry()
 
 # Run last to initialize all bank implementations after rest is done
-from parsers import banks  # noqa: F401, E402
+from parse import banks  # noqa: F401, E402
 
 __all__ = ["Parser", "REGISTRY"]
