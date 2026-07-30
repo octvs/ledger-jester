@@ -9,6 +9,7 @@ import logging
 
 from convert.cli import add_subparser as add_convert_subcmd
 from parse.cli import add_subparser as add_parse_subcmd
+from sync.cli import add_subparser as add_sync_subcmd
 
 
 def build_argparser() -> argparse.ArgumentParser:
@@ -23,6 +24,7 @@ def build_argparser() -> argparse.ArgumentParser:
 
     add_convert_subcmd(subparsers)
     add_parse_subcmd(subparsers)
+    add_sync_subcmd(subparsers)
 
     argparser.add_argument(
         "--verbose",
