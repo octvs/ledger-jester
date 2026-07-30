@@ -16,7 +16,7 @@
       imports = [inputs.treefmt-nix.flakeModule];
       systems = import inputs.systems;
       perSystem = {pkgs, ...}: let
-        parserDeps = with pkgs.python3.pkgs; [lxml pandas xlrd];
+        parserDeps = with pkgs.python3.pkgs; [lxml pandas xlrd pdfplumber];
       in {
         packages.default = pkgs.python3Packages.buildPythonApplication {
           pname = "ledger-jester";
