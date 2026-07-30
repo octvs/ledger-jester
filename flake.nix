@@ -17,8 +17,7 @@
       systems = import inputs.systems;
       perSystem = {pkgs, ...}: let
         parserDeps = with pkgs.python3.pkgs; [lxml pandas xlrd pdfplumber];
-      in {
-        packages.default = pkgs.python3Packages.buildPythonApplication {
+        basePkg = pkgs.python3Packages.buildPythonApplication {
           pname = "ledger-jester";
           version = "0-unstable";
           pyproject = true;
@@ -26,6 +25,14 @@
           build-system = with pkgs.python3.pkgs; [setuptools];
           optional-dependencies.parsers = parserDeps;
           nativeCheckInputs = [pkgs.python3.pkgs.pytestCheckHook] ++ parserDeps;
+        };
+      in {
+        packages = rec {
+          base = basePkg;
+          withParsers = basePkg.overridePythonAttrs (old: {
+            dependencies = (old.dependencies or []) ++ parserDeps;
+          });
+          default = withParsers;
         };
         devShells.default = pkgs.mkShell {
           packages = [pkgs.ledger pkgs.python3.pkgs.pytest] ++ parserDeps;
