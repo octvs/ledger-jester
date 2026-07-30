@@ -23,10 +23,15 @@ class RevolutRow(CsvRow):
     state: str = field(metadata={"col": "State"})
     balance: str = field(metadata={"col": "Balance"})
 
+    PAYEE_FILTERS = [
+        (re.compile(r"^(From |To |Payment from )"), ""),
+        (re.compile(r"^(Net interest paid) to .*"), r"\1"),
+    ]
+
     def __post_init__(self) -> None:
         """Remove date string from payee to allow matching across dates."""
-        _prefix = 'Net interest paid to "Instant Access Savings"'
-        self.payee = re.sub(_prefix + ".*$", _prefix, self.payee)
+        for pattern, replacement in self.PAYEE_FILTERS:
+            self.payee = pattern.sub(replacement, self.payee)
 
 
 @REGISTRY.register
