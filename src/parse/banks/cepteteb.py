@@ -31,7 +31,7 @@ class CeptetebParser(Parser):
         html = re.sub(r"<thead.*?</thead>", "", html, flags=re.DOTALL)
         tables = pd.read_html(StringIO(html), thousands=".", decimal=",")
         self.assign_subtype_suffix(tables[2].iat[3, 1])
-        df = tables[3].dropna(how="all", axis=0)
+        df = tables[3].dropna(how="all", axis=0).copy()
         df["Dekont"] = df["Dekont"].astype(int)
         df["Kur"] = tables[2].iat[3, 1].split(" ")[1]
         df["dt"] = pd.to_datetime(
