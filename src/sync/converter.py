@@ -10,7 +10,13 @@ from typing import Generic, Self, TypeVar
 
 from ledger_wrapper import Ledger, Transaction
 
-CURRENCY_CODES: dict[str, str] = {"$": "USD", "£": "GBP", "€": "EUR"}
+CURRENCY_CODES: dict[str, str] = {
+    "$": "USD",
+    "£": "GBP",
+    "€": "EUR",
+    "₺": "TRY",
+    "TL": "TRY",
+}
 
 
 @dataclass
