@@ -143,7 +143,7 @@ class CsvConverter(ABC, Generic[RowT]):
         """
         _pairs = defaultdict(list)
         ret = self.ledger.run_query(["csv", "--related", self.acc_name])
-        for line in csv.reader(ret.splitlines()):
+        for line in csv.reader(ret.splitlines(), escapechar="\\"):
             _pairs[line[2]].append(line[3])
         return _pairs
 
