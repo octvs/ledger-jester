@@ -16,15 +16,16 @@
       imports = [inputs.treefmt-nix.flakeModule];
       systems = import inputs.systems;
       perSystem = {pkgs, ...}: let
-        parserDeps = with pkgs.python3.pkgs; [lxml pandas xlrd pdfplumber];
-        basePkg = pkgs.python3Packages.buildPythonApplication {
+        pythonSet = pkgs.python314;
+        parserDeps = with pythonSet.pkgs; [lxml pandas xlrd pdfplumber];
+        basePkg = pythonSet.pkgs.buildPythonApplication {
           pname = "ledger-jester";
           version = "0-unstable";
           pyproject = true;
           src = ./.;
-          build-system = with pkgs.python3.pkgs; [setuptools];
+          build-system = with pythonSet.pkgs; [setuptools];
           optional-dependencies.parsers = parserDeps;
-          nativeCheckInputs = [pkgs.python3.pkgs.pytestCheckHook] ++ parserDeps;
+          nativeCheckInputs = [pythonSet.pkgs.pytestCheckHook] ++ parserDeps;
         };
       in {
         packages = rec {
@@ -35,7 +36,7 @@
           default = withParsers;
         };
         devShells.default = pkgs.mkShell {
-          packages = [pkgs.ledger pkgs.python3.pkgs.pytest] ++ parserDeps;
+          packages = [pkgs.ledger pythonSet.pkgs.pytest] ++ parserDeps;
         };
         treefmt = {
           projectRootFile = "flake.nix";
