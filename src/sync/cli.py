@@ -31,7 +31,7 @@ def add_subparser(subparsers: argparse._SubParsersAction) -> None:
         "fpaths",
         type=Path,
         metavar="FILE",
-        help="File to be synced.",
+        help="Files to be synced.",
         nargs="+",
     )
     sync_cmd.set_defaults(func=main)

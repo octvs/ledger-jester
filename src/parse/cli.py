@@ -22,7 +22,11 @@ def add_subparser(subparsers: argparse._SubParsersAction) -> None:
         help="Parser type to use.",
     )
     parse_cmd.add_argument(
-        "fpath", type=Path, metavar="FILE", help="Export file to be parsed."
+        "fpaths",
+        type=Path,
+        metavar="FILES",
+        help="Files to be parsed.",
+        nargs="+",
     )
     parse_cmd.set_defaults(func=main)
 
@@ -35,4 +39,5 @@ def main(args: argparse.Namespace) -> None:
 
     """
     parser = REGISTRY.get(args.type)()
-    parser.parse(args.fpath)
+    for fpath in args.fpaths:
+        parser.parse(fpath)
