@@ -48,12 +48,13 @@ def main(args: argparse.Namespace) -> None:
     parser = parser_registry.get(args.type)()
     for fpath in args.fpaths:
         parser.assert_path(fpath)
-        df = parser.read_file(fpath).sort_values(by="dt")
+        # Cast to str to get consistent hashes w/ convert
+        df = parser.read_file(fpath).sort_values(by="dt").astype(str)
         logging.info(f"Read {fpath} from disk.")
-        df = df.astype(str)  # Cast to str to get consistent hashes w/ convert
         for _row in df.to_dict(orient="records"):
             row = converter.ROW_TYPE.from_dict(_row)
-            if not (converter.skip_row(row) or converter.is_row_synced(row)):
-                xact = converter.convert(row)
-                if xact:
-                    print(xact)
+            if converter.skip_row(row) or converter.is_row_synced(row):
+                continue
+            xact = converter.convert(row)
+            if xact:
+                print(xact)
