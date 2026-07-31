@@ -44,12 +44,12 @@ class EnparaCCConverter(CsvConverter[EnparaCCRow]):
 
         posting_src = Posting(
             account=self.acc_name,
-            amount=Amount(row.amount, row.currency),
+            amount=Amount(row.amount, row.currency, invert=True),
             metadata={"csvid": row.csvid},
         )
         posting_dst = Posting(
             account=acct_dst,
-            amount=Amount(row.amount, row.currency, invert=True),
+            amount=Amount(row.amount, row.currency),
         )
         postings = [posting_dst, posting_src]
 
