@@ -68,7 +68,7 @@ class Parser(ABC):
         return df.groupby(pd.Grouper(key="dt", freq="ME"))
 
     def write_group(self, group: pd.DataFrame) -> None:
-        """Write a group (i.e. month) to its destination.
+        """Write a group (i.e. month) to cwd, print fname to stdout.
 
         Drops the 'dt' column, and writes the result to a CSV file named after
         the group's month and the parser's TYPE, followed by its suffix if
@@ -83,6 +83,7 @@ class Parser(ABC):
         fname = f"{dt}-{self.TYPE}{self.suffix}.csv"
         group.drop("dt", axis=1).to_csv(fname, index=False)
         logging.info(f"Wrote {fname} to disk on cwd.")
+        print(fname)
 
     def parse(self, fpath: Path) -> None:
         """Read a file and write all non-empty groups.
