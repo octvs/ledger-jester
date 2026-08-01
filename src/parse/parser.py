@@ -112,6 +112,5 @@ class Parser(ABC):
             raise ValueError(
                 f"Account type: {acc_type} is not recognized, can't recover."
             )
-        if self.SUBTYPES[acc_type]:
-            self.suffix = self.SUBTYPES[acc_type]
-            logging.debug(f"Assigned subtype suffix: {self.suffix}")
+        self.suffix = self.SUBTYPES[acc_type]
+        logging.debug(f"Assigned subtype suffix: {self.suffix}")
