@@ -36,7 +36,13 @@
           default = withParsers;
         };
         devShells.default = pkgs.mkShell {
-          packages = [pkgs.ledger pythonSet.pkgs.pytest] ++ parserDeps;
+          packages =
+            [
+              pkgs.ledger
+              pythonSet.pkgs.pytest
+              pythonSet.pkgs.snakeviz
+            ]
+            ++ parserDeps;
         };
         treefmt = {
           projectRootFile = "flake.nix";
