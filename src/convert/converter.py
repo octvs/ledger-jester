@@ -158,7 +158,7 @@ class CsvConverter(ABC, Generic[RowT]):
 
         Args:
             payee: String consisting payee name that would be checked for
-            cached candidates.
+              cached candidates.
 
         Returns:
             Most probable account name, or a placeholder in case of cache

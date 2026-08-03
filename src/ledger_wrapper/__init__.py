@@ -45,7 +45,7 @@ class Ledger:
 
         Args:
             query: List of strings that will be concatenated into a full
-            command to run.
+              command to run.
 
         Returns:
             Response of the query as a string.
