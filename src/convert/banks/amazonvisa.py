@@ -15,6 +15,7 @@ class AmazonVisaRow(CsvRow):
     date: str = field(metadata={"col": "Datum"})
     payee: str = field(metadata={"col": "Beschreibung"})
     raw_amount: str = field(metadata={"col": "Betrag"})
+    points: str = field(metadata={"col": "Punkte"})
 
     # Processed attributes
     amount: str = field(init=False)
@@ -51,6 +52,21 @@ class AmazonVisaConverter(CsvConverter[AmazonVisaRow]):
             amount=Amount(row.amount, row.currency, invert=True),
         )
         postings = [posting_dst, posting_src]
+
+        points = Amount(row.points, "AMZPT")
+        if points != 0:
+            point_postings = [
+                Posting("Equity:Amazon Points", points),
+                Posting(
+                    "Equity:Credit Card Rewards",
+                    Amount(row.points, "AMZPT", invert=True),
+                ),
+            ]
+            if postings[0].amount == 0:  # xact only w/ points
+                postings = []
+                point_postings[1].metadata = {"csvid": row.csvid}  # keep csvid
+
+            postings += point_postings
 
         return Transaction(
             date=date,

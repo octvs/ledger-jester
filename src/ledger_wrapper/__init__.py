@@ -136,6 +136,23 @@ class Amount:
             assert isinstance(other, Amount)
             return self._number > other._number
 
+    def __eq__(self, other):
+        """Check equality of an amount to another Amount or int.
+
+        Args:
+           other: The other Amount instance to compare.
+
+        Returns:
+            A boolean corresponding to the comparison, True if equal
+            side was larger, False otherwise.
+
+        """
+        if isinstance(other, int):
+            return self._number == other
+        else:
+            assert isinstance(other, Amount)
+            return (self._number == other._number) and (self.currency == other.currency)
+
 
 @dataclass
 class Posting:
