@@ -26,6 +26,7 @@ class AmazonVisaRow(CsvRow):
         _amount, _currency = self.raw_amount.split()
         self.amount = self.format_eu_number_to_us(_amount)
         self.currency = self.make_currency(_currency)
+        self.points = self.format_eu_number_to_us(self.points)
 
 
 @REGISTRY.register
